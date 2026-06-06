@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Neural Network Weight Evolution</title>
+    <link rel="stylesheet" href="nn-weights.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Neural network training</p>
+        <h1>Build intuition for initialization, backprop, and dead neurons.</h1>
+      </div>
+      <nav class="page-nav" aria-label="Pages">
+        <a href="index.html">Home</a>
+        <a href="ctc.html">CTC loss</a>
+        <a href="convolution.html">Convolution</a>
+        <a href="kernels.html">Kernels</a>
+        <a aria-current="page" href="nn-weights.html">NN weights</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <aside class="control-panel" aria-labelledby="controlsHeading">
+        <div class="panel-heading">
+          <h2 id="controlsHeading">Controls</h2>
+          <p>
+            Pick a failure mode, then scrub through training. The page shows
+            which neurons are alive, which gradients reach them, and why some
+            weights never learn.
+          </p>
+        </div>
+
+        <section class="control-section" aria-labelledby="dataHeading">
+          <div class="section-title-row">
+            <h3 id="dataHeading">Dataset</h3>
+            <span>2D binary task</span>
+          </div>
+          <label class="field">
+            <span>Preset</span>
+            <select id="datasetSelect">
+              <option value="xor">XOR corners</option>
+              <option value="moons">Two moons</option>
+              <option value="circles">Inside versus outside</option>
+              <option value="line">Linear split</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Sample count</span>
+            <input id="sampleCount" type="range" min="24" max="120" value="72" step="8">
+          </label>
+        </section>
+
+        <section class="control-section" aria-labelledby="initHeading">
+          <div class="section-title-row">
+            <h3 id="initHeading">Training</h3>
+            <span id="modelShapeLabel">2-4-1 ReLU net</span>
+          </div>
+          <label class="field">
+            <span>Hidden activation</span>
+            <select id="activationSelect">
+              <option value="relu">ReLU</option>
+              <option value="tanh">tanh</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Initialization</span>
+            <select id="initSelect">
+              <option value="he">Healthy random</option>
+              <option value="xavier">Xavier random</option>
+              <option value="tiny">Too small</option>
+              <option value="wide">Too large</option>
+              <option value="zeros">All zeros</option>
+              <option value="symmetric">Copied hidden units</option>
+              <option value="deadRelu" selected>Dead ReLU bias</option>
+              <option value="saturatedTanh">Saturated tanh</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Seed</span>
+            <input id="seedInput" type="number" min="1" max="999" value="7">
+          </label>
+          <label class="field">
+            <span>Learning rate</span>
+            <input id="learningRate" type="range" min="0.02" max="0.8" value="0.22" step="0.02">
+          </label>
+          <label class="field">
+            <span>Epochs</span>
+            <input id="epochCount" type="range" min="20" max="500" value="220" step="20">
+          </label>
+          <button class="primary-action" id="retrainButton" type="button">Retrain</button>
+        </section>
+
+        <section class="control-section" aria-labelledby="timeHeading">
+          <div class="section-title-row">
+            <h3 id="timeHeading">Epoch</h3>
+            <span id="epochLabel">0 / 220</span>
+          </div>
+          <label class="field">
+            <span>Training step</span>
+            <input id="epochSlider" type="range" min="0" max="220" value="0" step="1">
+          </label>
+          <div class="button-row">
+            <button class="icon-button" id="stepBack" type="button" aria-label="Previous epoch">&lt;</button>
+            <button class="icon-button" id="playPause" type="button" aria-label="Play training">&#9654;</button>
+            <button class="icon-button" id="stepForward" type="button" aria-label="Next epoch">&gt;</button>
+          </div>
+          <div class="metric-grid" aria-live="polite">
+            <div class="metric">
+              <span>Loss</span>
+              <strong id="lossValue">0</strong>
+            </div>
+            <div class="metric">
+              <span>Accuracy</span>
+              <strong id="accuracyValue">0%</strong>
+            </div>
+            <div class="metric">
+              <span>Active hidden units</span>
+              <strong id="aliveValue">0 / 4</strong>
+            </div>
+            <div class="metric">
+              <span>Mean hidden gradient</span>
+              <strong id="gradientValue">0</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="control-section" aria-labelledby="probeHeading">
+          <div class="section-title-row">
+            <h3 id="probeHeading">Backprop probe</h3>
+            <span id="probeLabel">sample 1</span>
+          </div>
+          <label class="field">
+            <span>Training sample</span>
+            <input id="probeSample" type="range" min="0" max="71" value="0" step="1">
+          </label>
+          <div class="probe-card" id="probeCard">
+            <strong>Forward and backward values</strong>
+            <p>Choose a sample to inspect the exact gradient flowing through each hidden unit.</p>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-labelledby="mainHeading">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Mental model</p>
+            <h2 id="mainHeading">Bad initialization is visible as repeated neurons, saturated neurons, or missing gradients.</h2>
+          </div>
+          <div class="summary-pill" id="summaryPill">full-batch gradient descent</div>
+        </div>
+
+        <section class="demo-section" aria-labelledby="surfaceHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Decision surface</p>
+              <h2 id="surfaceHeading">The background is the network output.</h2>
+            </div>
+            <code id="modelFormula">y = sigmoid(W2 relu(W1 x + b1) + b2)</code>
+          </div>
+          <div class="visual-grid">
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Dataset and prediction</h3>
+                <span id="datasetLabel">XOR corners</span>
+              </div>
+              <canvas id="surfaceCanvas" width="640" height="430" aria-label="Decision surface"></canvas>
+            </article>
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Current weights</h3>
+                <span>blue positive, rust negative</span>
+              </div>
+              <canvas id="networkCanvas" width="640" height="430" aria-label="Network weight diagram"></canvas>
+            </article>
+          </div>
+        </section>
+
+        <section class="diagnostic-section" aria-labelledby="diagnosticHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Neuron diagnostics</p>
+              <h2 id="diagnosticHeading">A hidden unit only learns when it activates and receives gradient.</h2>
+            </div>
+            <code>hidden gradient = output error * output weight * activation derivative</code>
+          </div>
+          <div class="diagnostic-grid">
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Hidden unit health</h3>
+                <span id="healthSummary">0 active</span>
+              </div>
+              <div class="health-grid" id="healthGrid"></div>
+            </article>
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Backprop for one sample</h3>
+                <span id="backpropSummary">sample 1</span>
+              </div>
+              <div class="backprop-table" id="backpropTable"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="history-section" aria-labelledby="historyHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Weight paths</p>
+              <h2 id="historyHeading">Every line is one scalar parameter over training.</h2>
+            </div>
+            <code>hover-free: scrub the epoch slider to compare the same trace at different times</code>
+          </div>
+          <article class="visual-card">
+            <div class="section-title-row">
+              <h3>Weight history</h3>
+              <span id="weightRange">range 0</span>
+            </div>
+            <canvas id="historyCanvas" width="1180" height="360" aria-label="Weight history chart"></canvas>
+          </article>
+          <article class="visual-card explanation-card" aria-labelledby="caseHeading">
+            <div class="section-title-row">
+              <h3 id="caseHeading">What this initialization is teaching</h3>
+              <span id="caseTag">healthy</span>
+            </div>
+            <div class="case-grid" id="caseGrid"></div>
+          </article>
+        </section>
+
+        <section class="intuition-band" aria-labelledby="intuitionHeading">
+          <div>
+            <p class="eyebrow">What to look for</p>
+            <h2 id="intuitionHeading">Initialization changes the computation graph that backprop sees.</h2>
+            <p>
+              Backprop is local multiplication. If a unit is copied from another
+              unit, both receive the same signal. If its derivative is zero, the
+              signal stops. If all weights are tiny, useful differences are weak.
+              Good initialization keeps units different and gradients measurable.
+            </p>
+          </div>
+          <div class="insight-grid">
+            <div class="insight">
+              <strong>Zeros and copied units</strong>
+              <p>Hidden units remain interchangeable, so capacity is wasted.</p>
+            </div>
+            <div class="insight">
+              <strong>Dead ReLU</strong>
+              <p>Negative pre-activations give derivative zero, blocking first-layer updates.</p>
+            </div>
+            <div class="insight">
+              <strong>Saturated tanh</strong>
+              <p>Outputs near -1 or 1 have tiny derivatives, so learning crawls.</p>
+            </div>
+            <div class="insight">
+              <strong>Healthy random</strong>
+              <p>Units start different, active, and gradient-connected.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="nn-weights.js"></script>
+  </body>
+</html>

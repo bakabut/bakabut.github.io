@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive ML Math Tutorials</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f6f2;
+        --surface: #ffffff;
+        --surface-strong: #eef3ef;
+        --ink: #17201c;
+        --muted: #65716a;
+        --line: #d7ded8;
+        --teal: #087f73;
+        --rust: #b94f2f;
+        --amber: #bd8614;
+        --shadow: 0 18px 45px rgba(23, 32, 28, 0.12);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      .shell {
+        display: grid;
+        align-content: center;
+        width: min(1500px, calc(100vw - 32px));
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 36px 0;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--rust);
+        font-size: 0.76rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 880px;
+        margin: 0;
+        font-size: clamp(2.4rem, 6vw, 5.6rem);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 720px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 1.08rem;
+        line-height: 1.65;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 34px;
+      }
+
+      .card {
+        display: grid;
+        min-height: 320px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        color: inherit;
+        text-decoration: none;
+        padding: 24px;
+        transition:
+          border-color 160ms ease,
+          transform 160ms ease,
+          box-shadow 160ms ease;
+      }
+
+      .card:hover,
+      .card:focus-visible {
+        border-color: var(--teal);
+        box-shadow: 0 22px 56px rgba(23, 32, 28, 0.16);
+        transform: translateY(-2px);
+        outline: 0;
+      }
+
+      .card h2 {
+        margin: 0;
+        font-size: clamp(1.7rem, 3vw, 2.6rem);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .card p {
+        margin: 14px 0 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .mini-visual {
+        display: grid;
+        align-content: end;
+        min-height: 120px;
+        margin-top: 24px;
+      }
+
+      .lattice {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+      }
+
+      .lattice span,
+      .bar-row span {
+        border-radius: 5px;
+        background: var(--surface-strong);
+      }
+
+      .lattice span {
+        min-height: 30px;
+        border: 1px solid var(--line);
+      }
+
+      .lattice span:nth-child(1),
+      .lattice span:nth-child(9),
+      .lattice span:nth-child(17),
+      .lattice span:nth-child(25) {
+        background: #d8f0eb;
+        border-color: #9bcac1;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: repeat(11, 1fr);
+        gap: 6px;
+        align-items: end;
+      }
+
+      .bar-row span {
+        background: var(--rust);
+      }
+
+      .bar-row span:nth-child(1),
+      .bar-row span:nth-child(11) {
+        height: 18px;
+      }
+
+      .bar-row span:nth-child(2),
+      .bar-row span:nth-child(10) {
+        height: 28px;
+      }
+
+      .bar-row span:nth-child(3),
+      .bar-row span:nth-child(9) {
+        height: 40px;
+      }
+
+      .bar-row span:nth-child(4),
+      .bar-row span:nth-child(8) {
+        height: 54px;
+      }
+
+      .bar-row span:nth-child(5),
+      .bar-row span:nth-child(7) {
+        height: 70px;
+      }
+
+      .bar-row span:nth-child(6) {
+        height: 88px;
+        background: var(--amber);
+      }
+
+      .kernel-mini {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+        align-content: stretch;
+      }
+
+      .kernel-mini span {
+        min-height: 28px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: var(--surface-strong);
+      }
+
+      .kernel-mini span:nth-child(3n + 2) {
+        background: #faedc7;
+        border-color: #d5a33c;
+      }
+
+      .kernel-mini span:nth-child(6n + 1),
+      .kernel-mini span:nth-child(6n + 6) {
+        background: #e2e9fb;
+        border-color: #aab9e4;
+      }
+
+      .weight-mini {
+        position: relative;
+        min-height: 132px;
+      }
+
+      .weight-mini span {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-radius: 999px;
+        background: var(--teal);
+        transform-origin: left center;
+      }
+
+      .weight-mini span:nth-child(1) {
+        top: 22px;
+        transform: rotate(8deg);
+      }
+
+      .weight-mini span:nth-child(2) {
+        top: 48px;
+        background: var(--rust);
+        transform: rotate(-10deg);
+      }
+
+      .weight-mini span:nth-child(3) {
+        top: 76px;
+        background: var(--amber);
+        transform: rotate(5deg);
+      }
+
+      .weight-mini span:nth-child(4) {
+        top: 104px;
+        background: #3559a8;
+        transform: rotate(-4deg);
+      }
+
+      .open-label {
+        align-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 22px;
+        color: var(--teal);
+        font-weight: 900;
+      }
+
+      @media (max-width: 1180px) {
+        .cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 820px) {
+        .shell {
+          align-content: start;
+          padding: 24px 0;
+        }
+
+        h1 {
+          max-width: 12em;
+          font-size: clamp(2rem, 9vw, 3.3rem);
+          line-height: 1.02;
+        }
+
+        .cards {
+          grid-template-columns: 1fr;
+        }
+
+        .card {
+          min-height: 260px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <p class="eyebrow">Interactive Tutorials</p>
+      <h1>Choose a visual math workbench.</h1>
+      <p class="lead">
+        Four standalone tutorials are available. The CTC page explains sequence
+        alignment with forward and backward dynamic programming. The convolution
+        hub opens the discrete and continuous convolution workbenches. The
+        kernels page shows how image filters detect lines. The neural network
+        page shows how weights evolve during toy training runs.
+      </p>
+
+      <div class="cards" aria-label="Tutorials">
+        <a class="card" href="ctc.html">
+          <div>
+            <p class="eyebrow">Sequence models</p>
+            <h2>CTC Loss</h2>
+            <p>
+              Step through alpha, beta, target probability, and frame-token
+              responsibility for CTC loss.
+            </p>
+          </div>
+          <div class="mini-visual lattice" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <span class="open-label">Open CTC tutorial</span>
+        </a>
+
+        <a class="card" href="convolution.html">
+          <div>
+            <p class="eyebrow">Probability theory</p>
+            <h2>Convolution</h2>
+            <p>
+              Compare discrete pair sums with continuous slide-multiply-integrate
+              convolution across different distributions.
+            </p>
+          </div>
+          <div class="mini-visual bar-row" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <span class="open-label">Open convolution tutorials</span>
+        </a>
+
+        <a class="card" href="kernels.html">
+          <div>
+            <p class="eyebrow">Computer vision</p>
+            <h2>Image Kernels</h2>
+            <p>
+              Slide 3x3 filters over a picture and see why vertical and
+              horizontal kernels fire on different structures.
+            </p>
+          </div>
+          <div class="mini-visual kernel-mini" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <span class="open-label">Open kernel tutorial</span>
+        </a>
+
+        <a class="card" href="nn-weights.html">
+          <div>
+            <p class="eyebrow">Neural networks</p>
+            <h2>NN Weights</h2>
+            <p>
+              Train a tiny network on XOR, moons, circles, and linear splits.
+              Scrub through epochs to see weights and boundaries change.
+            </p>
+          </div>
+          <div class="mini-visual weight-mini" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <span class="open-label">Open weight tutorial</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

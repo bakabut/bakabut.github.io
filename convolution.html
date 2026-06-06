@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Probability Convolution Tutorials</title>
+    <link rel="stylesheet" href="convolution.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Probability convolution</p>
+        <h1>Choose the version of convolution you want to see.</h1>
+      </div>
+      <nav class="page-nav" aria-label="Pages">
+        <a href="index.html">Home</a>
+        <a href="ctc.html">CTC loss</a>
+        <a aria-current="page" href="convolution.html">Convolution</a>
+        <a href="kernels.html">Kernels</a>
+        <a href="nn-weights.html">NN weights</a>
+      </nav>
+    </header>
+
+    <main class="hub-layout">
+      <section class="workspace hub-panel" aria-labelledby="hubHeading">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Mental model</p>
+            <h2 id="hubHeading">Convolution means: collect every hidden split that makes the same output.</h2>
+          </div>
+          <div class="summary-pill">X + Y = Z</div>
+        </div>
+
+        <div class="choice-grid" aria-label="Convolution tutorial choices">
+          <a class="choice-card" href="discrete-convolution.html">
+            <div>
+              <p class="eyebrow">Discrete</p>
+              <h2>Add probabilities along diagonals.</h2>
+              <p>
+                Use dice, coins, binomials, and Poisson examples. Pick a target sum
+                and watch matching pairs light up in the grid.
+              </p>
+            </div>
+            <div class="choice-visual mini-diagonal-grid" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <strong>Open discrete convolution</strong>
+          </a>
+
+          <a class="choice-card" href="continuous-convolution.html">
+            <div>
+              <p class="eyebrow">Continuous</p>
+              <h2>Slide, multiply, integrate.</h2>
+              <p>
+                Move the output value z and see how overlap area becomes the
+                density of the sum distribution.
+              </p>
+            </div>
+            <div class="choice-visual mini-slide-visual" aria-hidden="true">
+              <i></i>
+              <i></i>
+              <b></b>
+            </div>
+            <strong>Open continuous convolution</strong>
+          </a>
+        </div>
+
+        <section class="intuition-band" aria-labelledby="intuitionHeading">
+          <div>
+            <p class="eyebrow">One idea, two surfaces</p>
+            <h2 id="intuitionHeading">The output hides the split.</h2>
+            <p>
+              If you only know Z, you do not know how much came from X and how
+              much came from Y. Convolution is the accounting system that checks
+              every possible split.
+            </p>
+          </div>
+          <div class="insight-grid">
+            <div class="insight">
+              <strong>Discrete case</strong>
+              <p>Valid splits are cells on one diagonal. Add their products.</p>
+            </div>
+            <div class="insight">
+              <strong>Continuous case</strong>
+              <p>Valid splits form a continuum. Integrate the product curve.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

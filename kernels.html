@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image Kernel Line Detector</title>
+    <link rel="stylesheet" href="kernels.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Image kernels</p>
+        <h1>See how tiny filters detect vertical and horizontal lines.</h1>
+      </div>
+      <nav class="page-nav" aria-label="Pages">
+        <a href="index.html">Home</a>
+        <a href="ctc.html">CTC loss</a>
+        <a href="convolution.html">Convolution</a>
+        <a aria-current="page" href="kernels.html">Kernels</a>
+        <a href="nn-weights.html">NN weights</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <aside class="control-panel" aria-labelledby="controlsHeading">
+        <div class="panel-heading">
+          <h2 id="controlsHeading">Controls</h2>
+          <p>
+            Choose a picture and a 3x3 kernel. Click the image or move the
+            sliders to inspect the exact local calculation.
+          </p>
+        </div>
+
+        <section class="control-section" aria-labelledby="imageControls">
+          <div class="section-title-row">
+            <h3 id="imageControls">Picture</h3>
+            <span>grayscale input</span>
+          </div>
+          <label class="field">
+            <span>Preset</span>
+            <select id="imagePreset">
+              <option value="mixed">Mixed lines and shapes</option>
+              <option value="vertical">Mostly vertical lines</option>
+              <option value="horizontal">Mostly horizontal lines</option>
+              <option value="scene">Simple document scene</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="control-section" aria-labelledby="kernelControls">
+          <div class="section-title-row">
+            <h3 id="kernelControls">Kernel</h3>
+            <span>3x3 weights</span>
+          </div>
+          <div class="kernel-choice-grid" id="kernelButtons" aria-label="Kernel choices">
+            <button class="kernel-choice active" type="button" data-kernel="verticalLine">Vertical line</button>
+            <button class="kernel-choice" type="button" data-kernel="horizontalLine">Horizontal line</button>
+            <button class="kernel-choice" type="button" data-kernel="verticalEdge">Vertical edge</button>
+            <button class="kernel-choice" type="button" data-kernel="horizontalEdge">Horizontal edge</button>
+          </div>
+          <label class="field">
+            <span>Response display</span>
+            <select id="responseMode">
+              <option value="signed">Signed: positive and negative</option>
+              <option value="absolute">Absolute strength</option>
+              <option value="positive">Positive detections only</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="control-section" aria-labelledby="positionControls">
+          <div class="section-title-row">
+            <h3 id="positionControls">Selected pixel</h3>
+            <span id="pixelLabel">x=1, y=1</span>
+          </div>
+          <label class="field">
+            <span>x position</span>
+            <input id="xSlider" type="range" min="1" max="94" value="28" step="1">
+          </label>
+          <label class="field">
+            <span>y position</span>
+            <input id="ySlider" type="range" min="1" max="94" value="48" step="1">
+          </label>
+          <button class="scan-button" id="scanToggle" type="button">Play scan</button>
+          <div class="metric">
+            <span>Response at selected pixel</span>
+            <strong id="selectedResponse">0</strong>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-labelledby="mainHeading">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Mental model</p>
+            <h2 id="mainHeading">A kernel asks one local question everywhere in the image.</h2>
+          </div>
+          <div class="summary-pill" id="kernelSummary">patch * kernel = response</div>
+        </div>
+
+        <section class="demo-section" aria-labelledby="imageHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Interactive picture</p>
+              <h2 id="imageHeading">Slide the kernel across the image.</h2>
+            </div>
+            <code id="kernelFormula">response[x,y] = sum patch[i,j] * kernel[i,j]</code>
+          </div>
+
+          <div class="canvas-grid">
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Original picture</h3>
+                <span>click or drag</span>
+              </div>
+              <canvas id="sourceCanvas" height="430" aria-label="Original image with selected 3x3 patch"></canvas>
+            </article>
+
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Filtered response map</h3>
+                <span id="responseLegend">signed color</span>
+              </div>
+              <canvas id="responseCanvas" height="430" aria-label="Kernel response map"></canvas>
+            </article>
+          </div>
+        </section>
+
+        <section class="calculation-panel" aria-labelledby="calculationHeading">
+          <div class="section-title-row">
+            <h3 id="calculationHeading">One 3x3 calculation</h3>
+            <span id="kernelName">Vertical line detector</span>
+          </div>
+          <div class="matrix-workbench">
+            <article class="matrix-card">
+              <h4>Image patch</h4>
+              <div class="matrix-grid" id="patchMatrix"></div>
+            </article>
+            <article class="matrix-card">
+              <h4>Kernel weights</h4>
+              <div class="matrix-grid" id="kernelMatrix"></div>
+            </article>
+            <article class="matrix-card">
+              <h4>Products</h4>
+              <div class="matrix-grid" id="productMatrix"></div>
+            </article>
+            <article class="sum-card">
+              <span>Sum</span>
+              <strong id="sumValue">0</strong>
+              <p id="kernelExplanation"></p>
+            </article>
+          </div>
+        </section>
+
+        <section class="compare-section" aria-labelledby="compareHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Comparison</p>
+              <h2 id="compareHeading">Same picture, different questions.</h2>
+            </div>
+            <code>vertical detector responds to vertical strokes; horizontal detector responds to horizontal strokes</code>
+          </div>
+          <div class="compare-grid">
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Vertical line response</h3>
+                <span>center column positive</span>
+              </div>
+              <canvas id="verticalCompareCanvas" height="280" aria-label="Vertical line detector comparison"></canvas>
+            </article>
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Horizontal line response</h3>
+                <span>center row positive</span>
+              </div>
+              <canvas id="horizontalCompareCanvas" height="280" aria-label="Horizontal line detector comparison"></canvas>
+            </article>
+          </div>
+        </section>
+
+        <section class="intuition-band" aria-labelledby="intuitionHeading">
+          <div>
+            <p class="eyebrow">Deep intuition</p>
+            <h2 id="intuitionHeading">A kernel is a template matcher.</h2>
+            <p>
+              Positive weights say "I want bright pixels here." Negative weights
+              say "I want darker pixels here." When the local patch matches that
+              pattern, the products add to a large response.
+            </p>
+          </div>
+          <div class="insight-grid">
+            <div class="insight">
+              <strong>Vertical line kernel</strong>
+              <p>Rewards a bright center column and punishes bright side columns.</p>
+            </div>
+            <div class="insight">
+              <strong>Horizontal line kernel</strong>
+              <p>Rewards a bright center row and punishes bright rows above and below.</p>
+            </div>
+            <div class="insight">
+              <strong>Edge kernels</strong>
+              <p>Respond to change from dark to bright, so sign tells direction.</p>
+            </div>
+            <div class="insight">
+              <strong>CNN connection</strong>
+              <p>A convolutional layer learns many such kernels instead of hand-picking them.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="kernels.js"></script>
+  </body>
+</html>

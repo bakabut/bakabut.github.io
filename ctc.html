@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CTC Loss DP Workbench</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="title-block">
+        <p class="eyebrow">CTC Loss Workbench</p>
+        <h1>Follow probability mass through the CTC dynamic program.</h1>
+        <nav class="page-links" aria-label="Pages">
+          <a href="index.html">Home</a>
+          <a aria-current="page" href="ctc.html">CTC loss</a>
+          <a href="convolution.html">Convolution</a>
+          <a href="kernels.html">Kernels</a>
+          <a href="nn-weights.html">NN weights</a>
+        </nav>
+      </div>
+      <div class="headline-metrics" aria-live="polite">
+        <div>
+          <span class="metric-label">Total target probability</span>
+          <strong id="totalProbability">0</strong>
+        </div>
+        <div>
+          <span class="metric-label">CTC loss</span>
+          <strong id="ctcLoss">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="control-panel" aria-labelledby="controlsHeading">
+        <div class="panel-heading">
+          <h2 id="controlsHeading">Example</h2>
+          <p>The demo vocabulary is the blank plus the symbols in the target.</p>
+        </div>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>Preset</span>
+            <select id="presetSelect">
+              <option value="CAT">CAT</option>
+              <option value="AA">AA repeat</option>
+              <option value="ABA">ABA</option>
+              <option value="HELLO">HELLO repeat</option>
+              <option value="CUSTOM">Custom</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Target</span>
+            <input id="targetInput" type="text" value="CAT" maxlength="6" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="field">
+            <span>Frames</span>
+            <input id="frameInput" type="number" min="2" max="10" value="6">
+          </label>
+          <button class="primary-action" id="resetScores" type="button">Reset emissions</button>
+        </div>
+
+        <div class="extended-strip" aria-labelledby="extendedHeading">
+          <div class="section-title-row">
+            <h3 id="extendedHeading">Extended target</h3>
+            <span id="extendedCount"></span>
+          </div>
+          <div id="extendedSequence" class="token-row"></div>
+        </div>
+
+        <div class="emission-editor" aria-labelledby="emissionHeading">
+          <div class="section-title-row">
+            <h3 id="emissionHeading">Frame emissions</h3>
+            <span>normalized scores</span>
+          </div>
+          <div id="emissionEditor"></div>
+        </div>
+      </section>
+
+      <section class="workspace" aria-labelledby="latticeHeading">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Forward variable alpha[t,s]</p>
+            <h2 id="latticeHeading">DP lattice</h2>
+          </div>
+          <div class="step-controls">
+            <button class="icon-button" id="stepBack" type="button" title="Previous cell" aria-label="Previous cell">&lt;</button>
+            <button class="icon-button" id="playPause" type="button" title="Play" aria-label="Play">&#9654;</button>
+            <button class="icon-button" id="stepForward" type="button" title="Next cell" aria-label="Next cell">&gt;</button>
+          </div>
+        </div>
+
+        <label class="progress-field">
+          <span>Calculation step</span>
+          <input id="stepSlider" type="range" min="0" max="0" value="0">
+        </label>
+
+        <div class="dp-wrap" id="dpWrap">
+          <table class="dp-table" id="dpTable"></table>
+        </div>
+
+        <div class="detail-grid">
+          <article class="calculation-panel" aria-labelledby="cellHeading">
+            <h3 id="cellHeading">Selected cell</h3>
+            <div id="cellSummary" class="cell-summary"></div>
+            <div id="contributorList" class="contributor-list"></div>
+            <div id="formulaBlock" class="formula-block"></div>
+          </article>
+
+          <article class="path-panel" aria-labelledby="pathsHeading">
+            <div class="section-title-row">
+              <h3 id="pathsHeading">Largest complete alignments</h3>
+              <span id="pathCount"></span>
+            </div>
+            <div id="pathList" class="path-list"></div>
+          </article>
+        </div>
+
+        <div class="dp-divider"></div>
+
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Backward variable beta[t,s]</p>
+            <h2 id="backwardHeading">Backward lattice</h2>
+          </div>
+          <div class="step-controls">
+            <button class="icon-button" id="betaStepBack" type="button" title="Previous backward cell" aria-label="Previous backward cell">&lt;</button>
+            <button class="icon-button" id="betaPlayPause" type="button" title="Play backward calculation" aria-label="Play backward calculation">&#9654;</button>
+            <button class="icon-button" id="betaStepForward" type="button" title="Next backward cell" aria-label="Next backward cell">&gt;</button>
+          </div>
+        </div>
+
+        <label class="progress-field">
+          <span>Backward step</span>
+          <input id="betaStepSlider" type="range" min="0" max="0" value="0">
+        </label>
+
+        <div class="dp-wrap" id="betaWrap">
+          <table class="dp-table beta-table" id="betaTable"></table>
+        </div>
+
+        <div class="detail-grid">
+          <article class="calculation-panel" aria-labelledby="betaCellHeading">
+            <h3 id="betaCellHeading">Selected beta cell</h3>
+            <div id="betaCellSummary" class="cell-summary"></div>
+            <div id="betaContributorList" class="contributor-list"></div>
+            <div id="betaFormulaBlock" class="formula-block"></div>
+          </article>
+
+          <article class="path-panel" aria-labelledby="responsibilityHeading">
+            <div class="section-title-row">
+              <h3 id="responsibilityHeading">Alpha x beta responsibility</h3>
+              <span id="responsibilityFrame"></span>
+            </div>
+            <div id="responsibilityList" class="responsibility-list"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <section class="intuition-band" aria-labelledby="intuitionHeading">
+      <div class="intuition-inner">
+        <div>
+          <p class="eyebrow">Mental model</p>
+          <h2 id="intuitionHeading">CTC is path summation, not forced segmentation.</h2>
+          <p class="lead">
+            A network emits a symbol distribution at every frame. CTC asks:
+            "How much total probability did the network assign to every frame-by-frame
+            path that collapses to my target?"
+          </p>
+        </div>
+        <div class="insight-grid">
+          <div class="insight">
+            <strong>1. Each frame chooses a raw symbol.</strong>
+            <p>The raw path can contain blanks and repeated symbols because timing is unknown. Blank is not a printed space; it means no new label now.</p>
+          </div>
+          <div class="insight">
+            <strong>2. Collapse removes timing.</strong>
+            <p>First merge consecutive duplicates, then delete blanks. Many raw paths can become the same target.</p>
+          </div>
+          <div class="insight">
+            <strong>3. DP stores prefix mass.</strong>
+            <p>Each cell alpha[t,s] is the probability of being at extended-target state s after frame t.</p>
+          </div>
+          <div class="insight">
+            <strong>4. Repeats need a blank gap.</strong>
+            <p>For targets like AA, jumping from A to A is blocked, so the path must pass through blank.</p>
+          </div>
+          <div class="insight">
+            <strong>5. Beta is future mass.</strong>
+            <p>It starts at the final states and asks how much probability can still finish the target.</p>
+          </div>
+          <div class="insight">
+            <strong>6. Alpha times beta gives credit.</strong>
+            <p>The product shows how much successful target probability passes through a frame-state cell.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="explanation-band" aria-labelledby="deepHeading">
+      <div class="explanation-inner">
+        <div>
+          <h2 id="deepHeading">Deep intuition</h2>
+          <p>
+            Imagine pouring probability mass through a left-to-right lattice. Columns are states in the
+            extended target: blank, first label, blank, second label, and so on. At every new frame,
+            mass can stay, advance by one state, or sometimes skip over a blank. The emission probability
+            at that frame acts like a gate: if the network likes the symbol for this column, more mass
+            passes through.
+          </p>
+          <p>
+            The loss is small when a lot of mass reaches either final column. It does not matter which
+            exact alignment got there. That is why CTC works for speech, handwriting, OCR, and other
+            sequence tasks where labels are known but frame-level boundaries are not.
+          </p>
+        </div>
+        <div class="rule-box">
+          <h3>The recurrences</h3>
+          <code>alpha[t,s] = p_t(label_s) * (stay + advance + skip)</code>
+          <code>beta[t,s] = sum p_{t+1}(next_label) * beta[t+1,next_s]</code>
+          <p>
+            Alpha moves probability forward from the past. Beta moves credit backward from the future.
+            The same stay, advance, and skip rules are used in reverse; the skip is blocked for blanks
+            and repeated labels.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <script src="script.js"></script>
+  </body>
+</html>

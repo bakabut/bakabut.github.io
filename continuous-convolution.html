@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Continuous Probability Convolution</title>
+    <link rel="stylesheet" href="convolution.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Continuous probability convolution</p>
+        <h1>Build the density of X + Y by sliding, multiplying, and integrating.</h1>
+      </div>
+      <nav class="page-nav" aria-label="Pages">
+        <a href="index.html">Home</a>
+        <a href="ctc.html">CTC loss</a>
+        <a href="convolution.html">Convolution</a>
+        <a aria-current="page" href="continuous-convolution.html">Continuous</a>
+        <a href="kernels.html">Kernels</a>
+        <a href="nn-weights.html">NN weights</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <aside class="control-panel" aria-labelledby="controlsHeading">
+        <div class="panel-heading">
+          <h2 id="controlsHeading">Controls</h2>
+          <p>
+            Choose two continuous distributions and move z. The shaded product
+            area is the density value at the selected output.
+          </p>
+        </div>
+
+        <section class="control-section" aria-labelledby="continuousControls">
+          <div class="section-title-row">
+            <h3 id="continuousControls">Continuous example</h3>
+            <span>overlap area</span>
+          </div>
+          <label class="field">
+            <span>Example</span>
+            <select id="continuousPreset">
+              <option value="normalNormal">Normal + normal</option>
+              <option value="uniformUniform">Uniform + uniform</option>
+              <option value="exponentialExponential">Exponential + exponential</option>
+              <option value="normalUniform">Normal + uniform</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Output value z</span>
+            <input id="continuousZ" type="range" min="-4" max="4" value="0" step="0.05">
+          </label>
+          <div class="metric">
+            <span id="continuousZLabel">f_X+Y(0)</span>
+            <strong id="continuousValue">0</strong>
+          </div>
+          <p class="hint" id="continuousHint"></p>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-labelledby="mainHeading">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Mental model</p>
+            <h2 id="mainHeading">A density value is overlap area, not point probability.</h2>
+          </div>
+          <div class="summary-pill">f_Z(z) = integral f_X(x)f_Y(z-x) dx</div>
+        </div>
+
+        <section class="demo-section" aria-labelledby="continuousHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Interactive overlap</p>
+              <h2 id="continuousHeading">Freeze z, then test every possible x split.</h2>
+            </div>
+            <code>f_Z(z) = integral f_X(x) f_Y(z-x) dx</code>
+          </div>
+
+          <article class="formula-panel">
+            <h3>The movement</h3>
+            <div class="motion-strip" aria-label="Continuous convolution movement">
+              <div class="motion-step">
+                <div class="mini-bars teal-bars">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <strong>Keep f_X(x) fixed</strong>
+                <p>X is the coordinate we integrate over.</p>
+              </div>
+              <div class="motion-step">
+                <div class="mini-bars blue-bars flipped-bars">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <strong>Flip Y into f_Y(-x)</strong>
+                <p>The complement must move opposite to x.</p>
+              </div>
+              <div class="motion-step">
+                <div class="mini-bars mixed-bars">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <strong>Slide to f_Y(z-x)</strong>
+                <p>The slider z controls how much the flipped curve shifts.</p>
+              </div>
+              <div class="motion-step">
+                <div class="mini-bars amber-bars">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <strong>Multiply and integrate</strong>
+                <p>The shaded product area is the height of the result density.</p>
+              </div>
+            </div>
+          </article>
+
+          <div class="visual-grid">
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Overlap at current z</h3>
+                <span id="overlapLabel"></span>
+              </div>
+              <canvas id="overlapCanvas" height="330" aria-label="Continuous convolution overlap"></canvas>
+            </article>
+
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Result density</h3>
+                <span id="continuousSupportLabel"></span>
+              </div>
+              <canvas id="continuousCanvas" height="330" aria-label="Convolution result density"></canvas>
+            </article>
+          </div>
+
+          <article class="formula-panel">
+            <h3>Sliding multiplication process</h3>
+            <div class="process-strip" id="processStrip"></div>
+          </article>
+        </section>
+
+        <section class="intuition-band" aria-labelledby="intuitionHeading">
+          <div>
+            <p class="eyebrow">Deep intuition</p>
+            <h2 id="intuitionHeading">Continuous convolution is the same hidden-split idea.</h2>
+            <p>
+              There are infinitely many possible splits x and z-x. A single split
+              has no probability by itself, so the calculation accumulates density
+              over a small continuum of neighboring splits.
+            </p>
+          </div>
+          <div class="insight-grid">
+            <div class="insight">
+              <strong>Exact z has density</strong>
+              <p>The curve height is not P(Z=z). Probability lives in intervals.</p>
+            </div>
+            <div class="insight">
+              <strong>Overlap means compatibility</strong>
+              <p>Large overlap means many plausible splits support that z.</p>
+            </div>
+            <div class="insight">
+              <strong>Uniform plus uniform</strong>
+              <p>The overlap length grows, then shrinks, creating a triangle.</p>
+            </div>
+            <div class="insight">
+              <strong>Normal plus normal</strong>
+              <p>The result stays normal because independent noise variances add.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="convolution.js"></script>
+  </body>
+</html>

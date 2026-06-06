@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Discrete Probability Convolution</title>
+    <link rel="stylesheet" href="convolution.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Discrete probability convolution</p>
+        <h1>Build P(X + Y = z) by adding one diagonal of pair products.</h1>
+      </div>
+      <nav class="page-nav" aria-label="Pages">
+        <a href="index.html">Home</a>
+        <a href="ctc.html">CTC loss</a>
+        <a href="convolution.html">Convolution</a>
+        <a aria-current="page" href="discrete-convolution.html">Discrete</a>
+        <a href="kernels.html">Kernels</a>
+        <a href="nn-weights.html">NN weights</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <aside class="control-panel" aria-labelledby="controlsHeading">
+        <div class="panel-heading">
+          <h2 id="controlsHeading">Controls</h2>
+          <p>
+            Choose a distribution pair, then move z. Every highlighted grid cell
+            is one possible way to make that output sum.
+          </p>
+        </div>
+
+        <section class="control-section" aria-labelledby="discreteControls">
+          <div class="section-title-row">
+            <h3 id="discreteControls">Discrete example</h3>
+            <span>sum products</span>
+          </div>
+          <label class="field">
+            <span>Example</span>
+            <select id="discretePreset">
+              <option value="dice">Two dice</option>
+              <option value="bernoulliBinomial">Bernoulli + binomial</option>
+              <option value="poisson">Poisson + Poisson</option>
+              <option value="coinDice">Coin + die</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Target sum z</span>
+            <input id="discreteZ" type="range" min="2" max="12" value="7" step="1">
+          </label>
+          <div class="metric">
+            <span id="discreteZLabel">P(X + Y = 7)</span>
+            <strong id="discreteValue">0</strong>
+          </div>
+          <p class="hint" id="discreteHint"></p>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-labelledby="mainHeading">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Mental model</p>
+            <h2 id="mainHeading">For one z, every valid pair is a hidden explanation.</h2>
+          </div>
+          <div class="summary-pill">P(Z=z) = sum_x P(X=x)P(Y=z-x)</div>
+        </div>
+
+        <section class="demo-section" aria-labelledby="discreteHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Interactive table</p>
+              <h2 id="discreteHeading">The diagonal is the probability you want.</h2>
+            </div>
+            <code>P(Z=z) = sum_x P(X=x) P(Y=z-x)</code>
+          </div>
+
+          <article class="formula-panel">
+            <h3>Slide through one calculation</h3>
+            <div class="story-grid" id="discreteStory"></div>
+          </article>
+
+          <article class="formula-panel sequence-panel" aria-labelledby="sequenceViewHeading">
+            <div class="section-title-row">
+              <h3 id="sequenceViewHeading">Full sequence tool: (f*g)[n]</h3>
+              <span id="sequenceStepLabel">output step</span>
+            </div>
+            <p class="panel-copy">
+              This is the literal function view. Pick an output index n, then
+              walk through every k in h[n] = sum_k f[k]g[n-k].
+            </p>
+            <div class="sequence-controls">
+              <label class="field">
+                <span>Functions f and g</span>
+                <select id="sequencePreset">
+                  <option value="smallPmf">Small PMFs</option>
+                  <option value="impulseShift">Impulse shifts a function</option>
+                  <option value="movingAverage">Moving average kernel</option>
+                  <option value="skewed">Skewed PMFs</option>
+                </select>
+              </label>
+              <div class="metric compact-metric">
+                <span id="sequenceOutputLabel">(f*g)[0]</span>
+                <strong id="sequenceOutputValue">0</strong>
+              </div>
+            </div>
+            <div class="sequence-layout">
+              <div class="sequence-stage">
+                <canvas id="sequenceCanvas" height="430" aria-label="Full convolution sequence visualization"></canvas>
+              </div>
+              <div class="sequence-side">
+                <div class="k-controls" aria-label="output index controls">
+                  <button id="outputPrev" type="button" aria-label="Previous output index">Prev n</button>
+                  <label class="field compact-field">
+                    <span>Output n</span>
+                    <input id="outputSlider" type="range" min="0" max="5" value="0" step="1">
+                  </label>
+                  <button id="outputNext" type="button" aria-label="Next output index">Next n</button>
+                </div>
+                <div class="k-controls" aria-label="inner k controls">
+                  <button id="sequenceKPrev" type="button" aria-label="Previous k">Prev k</button>
+                  <label class="field compact-field">
+                    <span>Inner k</span>
+                    <input id="sequenceKSlider" type="range" min="0" max="3" value="0" step="1">
+                  </label>
+                  <button id="sequenceKNext" type="button" aria-label="Next k">Next k</button>
+                </div>
+                <div class="term-card" id="sequenceTermFormula"></div>
+                <div class="term-card" id="sequenceAccumulator"></div>
+              </div>
+            </div>
+            <div class="output-strip" id="sequenceOutputs" aria-label="All output values"></div>
+            <div class="iteration-list" id="sequenceTerms" aria-label="All k terms for the selected output"></div>
+          </article>
+
+          <article class="formula-panel function-panel" aria-labelledby="functionViewHeading">
+            <div class="section-title-row">
+              <h3 id="functionViewHeading">Function view: iterate over k</h3>
+              <span id="kStepLabel">k step</span>
+            </div>
+            <p class="panel-copy">
+              Think of X as a function f[k] and Y as a function g[k]. For the
+              selected output z, the calculation scans every k and multiplies
+              f[k] by the matching value g[z-k].
+            </p>
+            <div class="function-layout">
+              <div class="function-stage">
+                <canvas id="functionCanvas" height="360" aria-label="Function convolution over k"></canvas>
+              </div>
+              <div class="function-side">
+                <div class="k-controls" aria-label="k iteration controls">
+                  <button id="kPrev" type="button" aria-label="Previous k">Prev k</button>
+                  <label class="field compact-field">
+                    <span>Current k</span>
+                    <input id="kSlider" type="range" min="0" max="5" value="0" step="1">
+                  </label>
+                  <button id="kNext" type="button" aria-label="Next k">Next k</button>
+                </div>
+                <div class="term-card" id="kTermFormula"></div>
+                <div class="term-card" id="kAccumulator"></div>
+              </div>
+            </div>
+            <div class="iteration-list" id="kIterationList" aria-label="All k terms in the convolution sum"></div>
+          </article>
+
+          <div class="visual-grid">
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Input and output PMFs</h3>
+                <span id="discreteSupportLabel"></span>
+              </div>
+              <canvas id="discreteCanvas" height="310" aria-label="Discrete probability mass functions"></canvas>
+            </article>
+
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Pair grid</h3>
+                <span id="pairCount"></span>
+              </div>
+              <div id="pairGrid" class="pair-grid" aria-label="Pair contribution grid"></div>
+            </article>
+          </div>
+
+          <article class="formula-panel">
+            <h3>What gets summed</h3>
+            <div id="discreteFormula" class="formula-lines"></div>
+          </article>
+        </section>
+
+        <section class="intuition-band" aria-labelledby="intuitionHeading">
+          <div>
+            <p class="eyebrow">Deep intuition</p>
+            <h2 id="intuitionHeading">You are not averaging outcomes. You are summing explanations.</h2>
+            <p>
+              The output z can happen in several mutually exclusive ways. The
+              pair grid lists those ways. Because they are different hidden
+              explanations of the same visible sum, their probabilities add.
+            </p>
+          </div>
+          <div class="insight-grid">
+            <div class="insight">
+              <strong>Why multiply?</strong>
+              <p>If X and Y are independent, one pair has probability P(X=x) times P(Y=y).</p>
+            </div>
+            <div class="insight">
+              <strong>Why add?</strong>
+              <p>The valid pairs are alternative ways to get the same z.</p>
+            </div>
+            <div class="insight">
+              <strong>Why diagonals?</strong>
+              <p>Every cell on one diagonal has the same x+y value.</p>
+            </div>
+            <div class="insight">
+              <strong>Shape story</strong>
+              <p>Middle sums are often bigger because more pair splits reach them.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="convolution.js"></script>
+  </body>
+</html>
