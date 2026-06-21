@@ -60,10 +60,12 @@ const elements = {
   targetInput: document.getElementById("targetInput"),
   frameInput: document.getElementById("frameInput"),
   resetScores: document.getElementById("resetScores"),
+  emissionEditorPanel: document.querySelector(".emission-editor"),
   extendedCount: document.getElementById("extendedCount"),
   extendedSequence: document.getElementById("extendedSequence"),
   emissionEditor: document.getElementById("emissionEditor"),
   totalProbability: document.getElementById("totalProbability"),
+  finalMass: document.getElementById("finalMass"),
   ctcLoss: document.getElementById("ctcLoss"),
   stepBack: document.getElementById("stepBack"),
   stepForward: document.getElementById("stepForward"),
@@ -102,6 +104,9 @@ const state = {
 };
 
 function init() {
+  if (window.matchMedia("(max-width: 720px)").matches) {
+    elements.emissionEditorPanel.open = false;
+  }
   loadPreset("CAT");
   bindEvents();
 }
@@ -322,7 +327,13 @@ function updateEmissionProbLabels() {
 }
 
 function renderMetrics() {
+  const { dp, extended, frames } = state.calc;
+  const lastFrame = frames - 1;
+  const finalLabelMass = extended.length > 1 ? dp[lastFrame][extended.length - 2] : 0;
+  const trailingBlankMass = dp[lastFrame][extended.length - 1] || 0;
+
   elements.totalProbability.textContent = formatProb(state.calc.totalProbability);
+  elements.finalMass.textContent = `${formatProb(finalLabelMass)} + ${formatProb(trailingBlankMass)}`;
   elements.ctcLoss.textContent = Number.isFinite(state.calc.loss)
     ? state.calc.loss.toFixed(4)
     : "infinite";
@@ -344,6 +355,7 @@ function renderDpTable() {
   const { dp, emissions, extended, frames } = state.calc;
   const selected = stepToCell(state.selectedStep, extended.length);
   const sourceSet = getSourceSet(selected.t, selected.s);
+  elements.dpTable.style.minWidth = `${72 + extended.length * 78}px`;
 
   const headerCells = extended
     .map((label, s) => {
@@ -457,6 +469,7 @@ function renderBetaTable() {
   const { beta, dp, extended, frames, totalProbability } = state.calc;
   const selected = betaStepToCell(state.selectedBetaStep, extended.length, frames);
   const sourceSet = getBetaSourceSet(selected.t, selected.s);
+  elements.betaTable.style.minWidth = `${72 + extended.length * 78}px`;
 
   const headerCells = extended
     .map((label, s) => {
@@ -487,7 +500,7 @@ function renderBetaTable() {
         const value = isFuture ? "..." : formatProb(beta[t][s]);
         const throughMass = dp[t][s] * beta[t][s];
         const share = totalProbability > 0 ? throughMass / totalProbability : 0;
-        const secondLine = isFuture ? "alpha x beta" : `share=${formatPercent(share)}`;
+        const secondLine = isFuture ? "..." : `share=${formatPercent(share)}`;
 
         return `
           <td class="${classes}">

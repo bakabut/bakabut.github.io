@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Diffusion Model Workbench</title>
+    <link rel="stylesheet" href="diffusion.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Diffusion models</p>
+        <h1>See image generation as noise removal, one timestep at a time.</h1>
+      </div>
+      <nav class="page-nav" aria-label="Pages">
+        <a href="index.html">Home</a>
+        <a href="ctc.html">CTC loss</a>
+        <a href="convolution.html">Convolution</a>
+        <a href="kernels.html">Kernels</a>
+        <a href="nn-weights.html">NN weights</a>
+        <a aria-current="page" href="diffusion.html">Diffusion</a>
+        <a href="transformer.html">Transformer</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <aside class="control-panel" aria-labelledby="controlsHeading">
+        <div class="panel-heading">
+          <h2 id="controlsHeading">Controls</h2>
+          <p>
+            Pick a toy data distribution, add noise, then walk backward with a
+            denoiser that predicts where clean data is likely to be.
+          </p>
+        </div>
+
+        <section class="control-section" aria-labelledby="dataHeading">
+          <div class="section-title-row">
+            <h3 id="dataHeading">Clean data</h3>
+            <span id="sampleCountLabel">240 samples</span>
+          </div>
+          <label class="field">
+            <span>Preset</span>
+            <select id="presetSelect">
+              <option value="clusters">Three clusters</option>
+              <option value="ring">Ring</option>
+              <option value="moons">Two moons</option>
+              <option value="bars">Bars</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Sample count</span>
+            <input id="sampleCount" type="range" min="90" max="420" value="240" step="30">
+          </label>
+          <label class="field">
+            <span>Random seed</span>
+            <input id="seedInput" type="number" min="1" max="999" value="23">
+          </label>
+        </section>
+
+        <section class="control-section" aria-labelledby="forwardHeading">
+          <div class="section-title-row">
+            <h3 id="forwardHeading">Forward process</h3>
+            <span id="noiseLabel">t = 0.50</span>
+          </div>
+          <label class="field">
+            <span>Noise timestep</span>
+            <input id="noiseSlider" type="range" min="0" max="100" value="50" step="1">
+          </label>
+          <label class="field">
+            <span>Tracked point</span>
+            <input id="pointSlider" type="range" min="0" max="239" value="27" step="1">
+          </label>
+          <div class="button-row">
+            <button class="icon-button" id="noiseBack" type="button" aria-label="Decrease noise">&lt;</button>
+            <button class="icon-button" id="noisePlay" type="button" aria-label="Play forward noising">&#9654;</button>
+            <button class="icon-button" id="noiseForward" type="button" aria-label="Increase noise">&gt;</button>
+          </div>
+        </section>
+
+        <section class="control-section" aria-labelledby="reverseHeading">
+          <div class="section-title-row">
+            <h3 id="reverseHeading">Reverse process</h3>
+            <span id="reverseLabel">step 0 / 40</span>
+          </div>
+          <label class="field">
+            <span>Denoising step</span>
+            <input id="reverseSlider" type="range" min="0" max="40" value="0" step="1">
+          </label>
+          <label class="field">
+            <span>Denoiser quality</span>
+            <select id="qualitySelect">
+              <option value="good">Well trained</option>
+              <option value="blurry">Undertrained</option>
+              <option value="biased">Biased data prior</option>
+            </select>
+          </label>
+          <div class="button-row">
+            <button class="icon-button" id="reverseBack" type="button" aria-label="Previous denoising step">&lt;</button>
+            <button class="icon-button" id="reversePlay" type="button" aria-label="Play reverse denoising">&#9654;</button>
+            <button class="icon-button" id="reverseForward" type="button" aria-label="Next denoising step">&gt;</button>
+          </div>
+        </section>
+
+        <section class="control-section" aria-labelledby="metricHeading">
+          <div class="section-title-row">
+            <h3 id="metricHeading">Current values</h3>
+            <span>cosine schedule</span>
+          </div>
+          <div class="metric-grid" aria-live="polite">
+            <div class="metric">
+              <span>Signal kept</span>
+              <strong id="signalValue">0%</strong>
+            </div>
+            <div class="metric">
+              <span>Noise added</span>
+              <strong id="noiseValue">0%</strong>
+            </div>
+            <div class="metric">
+              <span>Predicted clean x0</span>
+              <strong id="predictionValue">0.00</strong>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-labelledby="mainHeading">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Mental model</p>
+            <h2 id="mainHeading">Training learns how to point noisy samples back toward the data distribution.</h2>
+          </div>
+          <div class="summary-pill">x_t = sqrt(alpha) x0 + sqrt(1-alpha) epsilon</div>
+        </div>
+
+        <section class="demo-section" aria-labelledby="forwardDemoHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Forward noising</p>
+              <h2 id="forwardDemoHeading">Data is gradually destroyed in a controlled way.</h2>
+            </div>
+            <code id="forwardFormula">q(x_t | x0) = N(sqrt(alpha_t) x0, (1 - alpha_t) I)</code>
+          </div>
+          <div class="visual-grid">
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Clean points versus noisy points</h3>
+                <span id="forwardCanvasLabel">t = 0.50</span>
+              </div>
+              <canvas id="forwardCanvas" width="760" height="520" aria-label="Forward diffusion noising visualization"></canvas>
+            </article>
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Noise schedule</h3>
+                <span id="scheduleLabel">signal and noise</span>
+              </div>
+              <canvas id="scheduleCanvas" width="760" height="520" aria-label="Diffusion noise schedule chart"></canvas>
+            </article>
+          </div>
+        </section>
+
+        <section class="demo-section" aria-labelledby="reverseDemoHeading">
+          <div class="demo-heading">
+            <div>
+              <p class="eyebrow">Reverse denoising</p>
+              <h2 id="reverseDemoHeading">Generation starts from noise and repeatedly applies the learned direction.</h2>
+            </div>
+            <code>model predicts epsilon or score, then the sampler takes a slightly cleaner step</code>
+          </div>
+          <div class="visual-grid reverse-grid">
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Reverse sampler</h3>
+                <span id="reverseCanvasLabel">pure noise</span>
+              </div>
+              <canvas id="reverseCanvas" width="760" height="520" aria-label="Reverse diffusion sampler visualization"></canvas>
+            </article>
+            <article class="visual-card">
+              <div class="section-title-row">
+                <h3>Score field</h3>
+                <span>arrows point toward likely clean data</span>
+              </div>
+              <canvas id="scoreCanvas" width="760" height="520" aria-label="Diffusion score field visualization"></canvas>
+            </article>
+          </div>
+        </section>
+
+        <section class="explain-band" aria-labelledby="explainHeading">
+          <div>
+            <p class="eyebrow">What the network learns</p>
+            <h2 id="explainHeading">The model is not trained to invent an image in one jump.</h2>
+            <p>
+              During training, a clean example is mixed with a known amount of
+              random noise. The network sees the noisy example and the timestep,
+              then learns to predict the noise that was added. At sampling time,
+              that prediction becomes a direction for taking one cleaner step.
+            </p>
+          </div>
+          <div class="insight-grid">
+            <div class="insight">
+              <strong>Forward process</strong>
+              <p>Known math adds Gaussian noise until the data becomes almost pure noise.</p>
+            </div>
+            <div class="insight">
+              <strong>Denoiser</strong>
+              <p>A neural net learns local cleanup directions for every noise level.</p>
+            </div>
+            <div class="insight">
+              <strong>Sampler</strong>
+              <p>Many small denoising steps turn random noise into a plausible sample.</p>
+            </div>
+            <div class="insight">
+              <strong>Conditioning</strong>
+              <p>Text, labels, or images can bias the denoising direction toward a desired result.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="diffusion.js"></script>
+  </body>
+</html>

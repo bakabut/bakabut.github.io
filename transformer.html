@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Transformer Flow Tutorial</title>
+    <link rel="stylesheet" href="transformer.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Transformer flow</p>
+        <h1>Transformers are stacks of edits to a shared state.</h1>
+      </div>
+      <nav class="page-nav" aria-label="Pages">
+        <a href="index.html">Home</a>
+        <a href="ctc.html">CTC loss</a>
+        <a href="convolution.html">Convolution</a>
+        <a href="kernels.html">Kernels</a>
+        <a href="nn-weights.html">NN weights</a>
+        <a href="diffusion.html">Diffusion</a>
+        <a aria-current="page" href="transformer.html">Transformer</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="thesis" aria-labelledby="thesisHeading">
+        <div>
+          <p class="eyebrow">One sentence</p>
+          <h2 id="thesisHeading">A Transformer keeps a vector at every token position, then repeatedly writes useful updates into those vectors.</h2>
+        </div>
+        <div class="formula">
+          <code>x = residual stream</code>
+          <code>x = x + attention(norm(x))</code>
+          <code>x = x + mlp(norm(x))</code>
+        </div>
+      </section>
+
+      <section class="blackboard" aria-labelledby="boardHeading">
+        <div class="board-head">
+          <div>
+            <p class="eyebrow">Interactive blackboard</p>
+            <h2 id="boardHeading">Follow the information, not the terminology.</h2>
+          </div>
+          <div class="stepper" aria-label="Blackboard chapters" id="chapterButtons">
+            <button class="active" type="button" data-step="0">State</button>
+            <button type="button" data-step="1">Block</button>
+            <button type="button" data-step="2">Attention</button>
+            <button type="button" data-step="3">MLP</button>
+            <button type="button" data-step="4">Layers</button>
+            <button type="button" data-step="5">Readout</button>
+          </div>
+        </div>
+
+        <canvas id="boardCanvas" width="1400" height="720" aria-label="Transformer information flow blackboard"></canvas>
+
+        <div class="caption-grid">
+          <article>
+            <p class="eyebrow">Current idea</p>
+            <h3 id="ideaTitle">State is the main object.</h3>
+            <p id="ideaText">Every token position carries a vector. That table of vectors is the residual stream.</p>
+          </article>
+          <article>
+            <p class="eyebrow">Intuition</p>
+            <h3 id="intuitionTitle">The stream is a shared notebook.</h3>
+            <p id="intuitionText">Each layer reads the notebook and writes a small correction into it.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="layer-flow" aria-labelledby="layerFlowHeading">
+        <div class="section-title">
+          <p class="eyebrow">Across layers</p>
+          <h2 id="layerFlowHeading">What changes as depth increases?</h2>
+        </div>
+        <div class="flow-row" aria-label="Layer flow">
+          <article><span>L0</span><strong>Identity</strong><p>Mostly token and position facts.</p></article>
+          <i></i>
+          <article><span>L1</span><strong>Local form</strong><p>Nearby syntax and phrase shape.</p></article>
+          <i></i>
+          <article><span>L2-L4</span><strong>Relations</strong><p>Subjects, objects, references, constraints.</p></article>
+          <i></i>
+          <article><span>Later</span><strong>Task state</strong><p>Information shaped for the next prediction.</p></article>
+        </div>
+      </section>
+
+      <section class="contracts" aria-labelledby="contractsHeading">
+        <div class="section-title">
+          <p class="eyebrow">Component contracts</p>
+          <h2 id="contractsHeading">What each piece is responsible for.</h2>
+        </div>
+        <div class="contract-grid">
+          <article>
+            <h3>Residual stream</h3>
+            <p><b>Job:</b> carry the current token-state table.</p>
+            <p><b>Why:</b> gives every block a shared workspace.</p>
+            <p><b>Without it:</b> deep layers lose earlier information and train poorly.</p>
+          </article>
+          <article>
+            <h3>Layer norm</h3>
+            <p><b>Job:</b> make vectors readable at a stable scale.</p>
+            <p><b>Why:</b> keeps repeated blocks numerically calm.</p>
+            <p><b>Without it:</b> activations drift and deep training becomes fragile.</p>
+          </article>
+          <article>
+            <h3>Self-attention</h3>
+            <p><b>Job:</b> move information between positions.</p>
+            <p><b>Why:</b> distant tokens need to influence each other.</p>
+            <p><b>Without it:</b> positions mostly think alone.</p>
+          </article>
+          <article>
+            <h3>Attention heads</h3>
+            <p><b>Job:</b> run several communication patterns at once.</p>
+            <p><b>Why:</b> syntax, references, and task cues may need separate routes.</p>
+            <p><b>Without them:</b> fewer independent channels per layer.</p>
+          </article>
+          <article>
+            <h3>MLP</h3>
+            <p><b>Job:</b> transform each position locally.</p>
+            <p><b>Why:</b> attention gathers context; MLP turns it into features.</p>
+            <p><b>Without it:</b> the model communicates but computes weakly.</p>
+          </article>
+          <article>
+            <h3>Position information</h3>
+            <p><b>Job:</b> tell the model where tokens are.</p>
+            <p><b>Why:</b> order changes meaning.</p>
+            <p><b>Without it:</b> many reorderings look too similar.</p>
+          </article>
+          <article>
+            <h3>Causal mask</h3>
+            <p><b>Job:</b> hide future tokens in decoder models.</p>
+            <p><b>Why:</b> generation only knows the past.</p>
+            <p><b>Without it:</b> training can cheat.</p>
+          </article>
+          <article>
+            <h3>Output head</h3>
+            <p><b>Job:</b> turn the final state into vocabulary scores.</p>
+            <p><b>Why:</b> it reads internal state into a next-token distribution.</p>
+            <p><b>Without it:</b> no token probabilities come out.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="misconceptions" aria-labelledby="misHeading">
+        <div class="section-title">
+          <p class="eyebrow">Misconceptions</p>
+          <h2 id="misHeading">Common wrong pictures.</h2>
+        </div>
+        <div class="myth-grid">
+          <article><strong>Attention is the whole model.</strong><p>Attention is communication. The residual stream and MLPs are equally central.</p></article>
+          <article><strong>Attention weights are explanations.</strong><p>They show routing, not what information was written or how later layers used it.</p></article>
+          <article><strong>Each token stores one clean fact.</strong><p>A vector is a superposition of many features at once.</p></article>
+          <article><strong>Layers all do the same thing.</strong><p>The operation repeats, but the state being operated on becomes richer.</p></article>
+          <article><strong>The MLP is optional decoration.</strong><p>It is the main local nonlinear computation inside each block.</p></article>
+          <article><strong>Meaning lives in one place.</strong><p>It is distributed across positions, layers, heads, and vector directions.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <script src="transformer.js"></script>
+  </body>
+</html>

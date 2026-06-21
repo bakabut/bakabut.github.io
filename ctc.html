@@ -17,12 +17,18 @@
           <a href="convolution.html">Convolution</a>
           <a href="kernels.html">Kernels</a>
           <a href="nn-weights.html">NN weights</a>
+          <a href="diffusion.html">Diffusion</a>
+          <a href="transformer.html">Transformer</a>
         </nav>
       </div>
       <div class="headline-metrics" aria-live="polite">
         <div>
           <span class="metric-label">Total target probability</span>
           <strong id="totalProbability">0</strong>
+        </div>
+        <div>
+          <span class="metric-label">Final-state mass</span>
+          <strong id="finalMass">0 + 0</strong>
         </div>
         <div>
           <span class="metric-label">CTC loss</span>
@@ -68,13 +74,13 @@
           <div id="extendedSequence" class="token-row"></div>
         </div>
 
-        <div class="emission-editor" aria-labelledby="emissionHeading">
-          <div class="section-title-row">
+        <details class="emission-editor" aria-labelledby="emissionHeading" open>
+          <summary class="section-title-row">
             <h3 id="emissionHeading">Frame emissions</h3>
             <span>normalized scores</span>
-          </div>
+          </summary>
           <div id="emissionEditor"></div>
-        </div>
+        </details>
       </section>
 
       <section class="workspace" aria-labelledby="latticeHeading">
@@ -94,6 +100,12 @@
           <span>Calculation step</span>
           <input id="stepSlider" type="range" min="0" max="0" value="0">
         </label>
+
+        <div class="lattice-legend" aria-label="Forward lattice legend">
+          <span><i class="legend-swatch current"></i>Current</span>
+          <span><i class="legend-swatch source"></i>Incoming</span>
+          <span><i class="legend-swatch final"></i>Final states</span>
+        </div>
 
         <div class="dp-wrap" id="dpWrap">
           <table class="dp-table" id="dpTable"></table>
@@ -134,6 +146,12 @@
           <span>Backward step</span>
           <input id="betaStepSlider" type="range" min="0" max="0" value="0">
         </label>
+
+        <div class="lattice-legend" aria-label="Backward lattice legend">
+          <span><i class="legend-swatch current"></i>Current</span>
+          <span><i class="legend-swatch source"></i>Outgoing</span>
+          <span><i class="legend-swatch final"></i>Final states</span>
+        </div>
 
         <div class="dp-wrap" id="betaWrap">
           <table class="dp-table beta-table" id="betaTable"></table>

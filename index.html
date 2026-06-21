@@ -70,7 +70,7 @@
 
       .cards {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 16px;
         margin-top: 34px;
       }
@@ -248,6 +248,110 @@
         transform: rotate(-4deg);
       }
 
+      .diffusion-mini {
+        position: relative;
+        min-height: 132px;
+        overflow: hidden;
+      }
+
+      .diffusion-mini span {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: var(--rust);
+        opacity: 0.75;
+      }
+
+      .diffusion-mini span:nth-child(1) {
+        left: 12%;
+        top: 18%;
+        background: var(--teal);
+      }
+
+      .diffusion-mini span:nth-child(2) {
+        left: 26%;
+        top: 62%;
+      }
+
+      .diffusion-mini span:nth-child(3) {
+        left: 44%;
+        top: 30%;
+        background: var(--amber);
+      }
+
+      .diffusion-mini span:nth-child(4) {
+        left: 58%;
+        top: 74%;
+        background: #3559a8;
+      }
+
+      .diffusion-mini span:nth-child(5) {
+        left: 76%;
+        top: 22%;
+      }
+
+      .diffusion-mini span:nth-child(6) {
+        left: 86%;
+        top: 58%;
+        background: var(--teal);
+      }
+
+      .diffusion-mini::before,
+      .diffusion-mini::after {
+        content: "";
+        position: absolute;
+        inset: 16px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+      }
+
+      .diffusion-mini::after {
+        inset: 36px;
+        border-color: #9bcac1;
+      }
+
+      .transformer-mini {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        align-content: center;
+      }
+
+      .transformer-mini span {
+        position: relative;
+        min-height: 26px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: var(--surface-strong);
+      }
+
+      .transformer-mini span:nth-child(4n + 1) {
+        background: var(--teal-soft);
+        border-color: #9bcac1;
+      }
+
+      .transformer-mini span:nth-child(4n + 2) {
+        background: var(--blue-soft);
+        border-color: #aab9e4;
+      }
+
+      .transformer-mini span:nth-child(4n + 3) {
+        background: var(--amber-soft);
+        border-color: #d5a33c;
+      }
+
+      .transformer-mini span::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: -8px;
+        width: 1px;
+        height: 8px;
+        background: var(--rust);
+        opacity: 0.5;
+      }
+
       .open-label {
         align-self: end;
         display: inline-flex;
@@ -291,11 +395,13 @@
       <p class="eyebrow">Interactive Tutorials</p>
       <h1>Choose a visual math workbench.</h1>
       <p class="lead">
-        Four standalone tutorials are available. The CTC page explains sequence
+        Six standalone tutorials are available. The CTC page explains sequence
         alignment with forward and backward dynamic programming. The convolution
         hub opens the discrete and continuous convolution workbenches. The
         kernels page shows how image filters detect lines. The neural network
-        page shows how weights evolve during toy training runs.
+        page shows how weights evolve during toy training runs. The diffusion
+        page shows generation as repeated denoising. The transformer page shows
+        how attention moves information between tokens.
       </p>
 
       <div class="cards" aria-label="Tutorials">
@@ -363,6 +469,38 @@
             <span></span><span></span><span></span><span></span>
           </div>
           <span class="open-label">Open weight tutorial</span>
+        </a>
+
+        <a class="card" href="diffusion.html">
+          <div>
+            <p class="eyebrow">Generative models</p>
+            <h2>Diffusion</h2>
+            <p>
+              Add Gaussian noise to data, inspect the score field, and run a
+              reverse sampler from pure noise back to structured samples.
+            </p>
+          </div>
+          <div class="mini-visual diffusion-mini" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <span class="open-label">Open diffusion tutorial</span>
+        </a>
+
+        <a class="card" href="transformer.html">
+          <div>
+            <p class="eyebrow">Language models</p>
+            <h2>Transformer</h2>
+            <p>
+              Inspect token embeddings, attention maps, residual streams, and
+              next-token probabilities in a tiny Transformer block.
+            </p>
+          </div>
+          <div class="mini-visual transformer-mini" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <span class="open-label">Open transformer tutorial</span>
         </a>
       </div>
     </main>

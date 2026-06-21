@@ -1,0 +1,377 @@
+:root {
+  color-scheme: dark;
+  --bg: #07111d;
+  --panel: #0f2033;
+  --ink: #fff4df;
+  --muted: #b8c9d8;
+  --line: rgba(255, 244, 223, 0.16);
+  --blue: #58a6ff;
+  --blue-soft: rgba(88, 166, 255, 0.16);
+  --brown: #c6864a;
+  --brown-soft: rgba(198, 134, 74, 0.18);
+  --gold: #ffc857;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-width: 320px;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(88, 166, 255, 0.22), transparent 32rem),
+    radial-gradient(circle at 88% 18%, rgba(198, 134, 74, 0.14), transparent 30rem),
+    var(--bg);
+  color: var(--ink);
+}
+
+button {
+  cursor: pointer;
+  font: inherit;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  width: calc(100vw - 32px);
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 22px 0 14px;
+}
+
+.topbar > div,
+.shell,
+.blackboard {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--gold);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.topbar h1,
+.thesis h2,
+.board-head h2,
+.section-title h2 {
+  margin: 0;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.topbar h1 {
+  max-width: 880px;
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  line-height: 0.97;
+}
+
+.page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.page-nav a {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 244, 223, 0.06);
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-decoration: none;
+  padding: 10px 12px;
+}
+
+.page-nav a[aria-current="page"] {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #15202c;
+}
+
+.shell {
+  width: calc(100vw - 32px);
+  max-width: 1500px;
+  margin: 0 auto 36px;
+}
+
+.thesis,
+.blackboard,
+.layer-flow,
+.contracts,
+.misconceptions {
+  margin-top: 16px;
+}
+
+.thesis {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 430px);
+  gap: 16px;
+}
+
+.thesis > div,
+.formula,
+.blackboard,
+.caption-grid article,
+.flow-row article,
+.contracts,
+.misconceptions,
+.contract-grid article,
+.myth-grid article {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(15, 32, 51, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.thesis > div,
+.formula {
+  padding: 20px;
+}
+
+.thesis h2 {
+  max-width: 760px;
+  font-size: clamp(1.65rem, 2.8vw, 3.2rem);
+  line-height: 1.03;
+}
+
+.formula {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.formula code {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 244, 223, 0.06);
+  color: var(--ink);
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+
+.blackboard {
+  padding: 14px;
+}
+
+.board-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 0.8fr);
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.board-head h2 {
+  font-size: clamp(1.35rem, 2vw, 2.2rem);
+  line-height: 1.06;
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stepper button {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 244, 223, 0.06);
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.stepper button.active {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #15202c;
+}
+
+.blackboard canvas {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #081522;
+}
+
+.caption-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.caption-grid article {
+  padding: 14px;
+}
+
+.caption-grid h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.caption-grid p,
+.flow-row p,
+.contract-grid p,
+.myth-grid p {
+  color: var(--muted);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.caption-grid p {
+  margin: 8px 0 0;
+}
+
+.section-title {
+  margin-bottom: 12px;
+}
+
+.section-title h2 {
+  font-size: clamp(1.45rem, 2.2vw, 2.35rem);
+  line-height: 1.08;
+}
+
+.flow-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.flow-row article {
+  min-height: 150px;
+  padding: 16px;
+}
+
+.flow-row span {
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.flow-row strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.15rem;
+}
+
+.flow-row i {
+  display: block;
+  height: 2px;
+  background: var(--blue);
+}
+
+.contracts,
+.misconceptions {
+  padding: 18px;
+}
+
+.contract-grid,
+.myth-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.contract-grid article,
+.myth-grid article {
+  padding: 15px;
+}
+
+.contract-grid h3 {
+  margin: 0 0 10px;
+  color: var(--gold);
+}
+
+.contract-grid p,
+.myth-grid p {
+  margin: 8px 0 0;
+}
+
+.myth-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.myth-grid strong {
+  color: var(--gold);
+}
+
+@media (max-width: 1180px) {
+  .topbar,
+  .thesis,
+  .board-head,
+  .caption-grid,
+  .flow-row,
+  .contract-grid,
+  .myth-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: start;
+  }
+
+  .topbar h1 {
+    max-width: 12em;
+  }
+
+  .page-nav {
+    justify-content: flex-start;
+  }
+
+  .flow-row i {
+    width: 2px;
+    height: 24px;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  .shell {
+    width: calc(100vw - 20px);
+  }
+
+  .topbar h1 {
+    font-size: 1.65rem;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .thesis h2,
+  .board-head h2,
+  .section-title h2 {
+    font-size: 1.4rem;
+    overflow-wrap: anywhere;
+  }
+
+  .thesis > div,
+  .formula,
+  .blackboard,
+  .contracts,
+  .misconceptions {
+    padding: 12px;
+  }
+
+  .stepper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
