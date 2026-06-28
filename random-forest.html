@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Random Forest Interview Tutorial</title>
+    <link rel="stylesheet" href="ml-interview.css">
+  </head>
+  <body data-page="random-forest">
+    <header class="topline">
+      <div class="topline-inner">
+        <a class="brand" href="ml-interview.html"><span class="brand-mark">ML</span> Yandex interview track</a>
+        <nav class="top-nav" aria-label="Tutorial pages">
+          <a href="index.html">Home</a>
+          <a href="ml-interview.html">Hub</a>
+          <a href="decision-tree.html">Tree</a>
+          <a aria-current="page" href="random-forest.html">Forest</a>
+          <a href="catboost.html">CatBoost</a>
+          <a href="xgboost.html">XGBoost</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="side-panel">
+        <h2>Forest checklist</h2>
+        <p class="side-note">Focus on variance reduction and tree decorrelation.</p>
+        <div class="progress-list">
+          <label><input type="checkbox" data-progress="bagging"> Bootstrap bagging</label>
+          <label><input type="checkbox" data-progress="features"> Feature subsampling</label>
+          <label><input type="checkbox" data-progress="oob"> OOB validation</label>
+          <label><input type="checkbox" data-progress="importance"> Importance pitfalls</label>
+        </div>
+        <nav class="page-links" aria-label="Track pages">
+          <a href="ml-interview.html">Overview</a>
+          <a href="decision-tree.html">Decision Tree</a>
+          <a aria-current="page" href="random-forest.html">Random Forest</a>
+          <a href="catboost.html">CatBoost</a>
+          <a href="xgboost.html">XGBoost</a>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Bagging ensemble</p>
+            <h1>A random forest makes unstable trees useful by averaging them.</h1>
+            <p>
+              Each tree sees a bootstrap sample and a random subset of features at
+              each split. The individual trees stay noisy, but their average has
+              much lower variance.
+            </p>
+          </div>
+          <div class="brief-card">
+            <span>Interview answer</span>
+            <strong>Average decorrelated trees.</strong>
+            <p>Bagging reduces variance. Feature subsampling reduces correlation between trees.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Core mechanics</p>
+          <h2>What randomness is injected?</h2>
+          <div class="concept-grid">
+            <article class="concept">
+              <h3>Bootstrap rows</h3>
+              <p>Each tree trains on a sample drawn with replacement. Some rows repeat, and some are left out for that tree.</p>
+            </article>
+            <article class="concept">
+              <h3>Random features</h3>
+              <p>At every split, the tree considers only a subset of features. This prevents one dominant feature from making all trees too similar.</p>
+            </article>
+            <article class="concept">
+              <h3>Aggregation</h3>
+              <p>Classification averages class probabilities or votes. Regression averages numeric predictions.</p>
+            </article>
+            <article class="concept">
+              <h3>OOB score</h3>
+              <p>For each row, predict using only trees where that row was not in the bootstrap sample. This gives a built-in validation estimate.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Variance story</p>
+          <h2>The key sentence is about correlation.</h2>
+          <div class="formula-grid">
+            <article class="formula">
+              <strong>Averaging independent models</strong>
+              <code>Var(mean) = Var(tree) / T</code>
+              <p>This is the ideal case, but forest trees are not independent.</p>
+            </article>
+            <article class="formula">
+              <strong>Correlated trees</strong>
+              <code>lower correlation => stronger variance reduction</code>
+              <p>Feature subsampling exists to reduce correlation, not just to make training faster.</p>
+            </article>
+            <article class="formula">
+              <strong>Bias</strong>
+              <code>forest bias ≈ deep tree bias</code>
+              <p>Random forests mainly reduce variance. They do not build additive corrections like boosting.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Drills</p>
+          <h2>Interview answers that separate forest from boosting.</h2>
+          <div class="drill-grid">
+            <article class="drill">
+              <h3>Why not train identical trees on the full dataset?</h3>
+              <button class="answer-button" type="button" data-reveal="forest-a1" aria-expanded="false">Reveal answer</button>
+              <div class="answer-box" id="forest-a1">
+                <h4>Answer</h4>
+                <p>If trees are identical or highly correlated, averaging gives little benefit. Bootstrap sampling and random features create diversity, which reduces variance.</p>
+              </div>
+            </article>
+            <article class="drill">
+              <h3>Does a random forest overfit as trees are added?</h3>
+              <button class="answer-button" type="button" data-reveal="forest-a2" aria-expanded="false">Reveal answer</button>
+              <div class="answer-box" id="forest-a2">
+                <h4>Answer</h4>
+                <p>Usually adding more trees stabilizes the ensemble instead of overfitting. Overfitting is controlled more by tree depth, leaf size, feature leakage, and data noise.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Traps</p>
+          <h2>Things interviewers often probe.</h2>
+          <div class="mistake-grid">
+            <article class="mistake"><strong>OOB is not magic.</strong><p>It estimates validation performance from unused bootstrap rows, but it does not replace the right time or group split.</p></article>
+            <article class="mistake"><strong>Impurity importance is biased.</strong><p>Prefer permutation importance when cardinality or correlated features can distort the story.</p></article>
+            <article class="mistake"><strong>Forest is not sequential.</strong><p>Trees are trained independently, so the model is easy to parallelize and differs fundamentally from boosting.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Quick quiz</p>
+          <h2>Check the ensemble intuition.</h2>
+          <div class="quiz-grid">
+            <article class="quiz-card" data-quiz data-correct="Correct: feature subsampling decorrelates trees." data-wrong="Not quite. The main interview answer is tree decorrelation.">
+              <p>Why does random forest consider only a subset of features at a split?</p>
+              <button type="button" data-answer="false">To make each tree shallow</button>
+              <button type="button" data-answer="true">To reduce correlation between trees</button>
+              <button type="button" data-answer="false">To remove categorical features</button>
+              <p class="quiz-feedback"></p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="ml-interview.js"></script>
+  </body>
+</html>

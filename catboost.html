@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CatBoost Interview Tutorial</title>
+    <link rel="stylesheet" href="ml-interview.css">
+  </head>
+  <body data-page="catboost">
+    <header class="topline">
+      <div class="topline-inner">
+        <a class="brand" href="ml-interview.html"><span class="brand-mark">ML</span> Yandex interview track</a>
+        <nav class="top-nav" aria-label="Tutorial pages">
+          <a href="index.html">Home</a>
+          <a href="ml-interview.html">Hub</a>
+          <a href="decision-tree.html">Tree</a>
+          <a href="random-forest.html">Forest</a>
+          <a aria-current="page" href="catboost.html">CatBoost</a>
+          <a href="xgboost.html">XGBoost</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="side-panel">
+        <h2>CatBoost checklist</h2>
+        <p class="side-note">The central topic is leakage-safe categorical handling.</p>
+        <div class="progress-list">
+          <label><input type="checkbox" data-progress="target-stats"> Target statistics</label>
+          <label><input type="checkbox" data-progress="ordered"> Ordered boosting</label>
+          <label><input type="checkbox" data-progress="symmetric"> Symmetric trees</label>
+          <label><input type="checkbox" data-progress="compare"> CatBoost vs XGBoost</label>
+        </div>
+        <nav class="page-links" aria-label="Track pages">
+          <a href="ml-interview.html">Overview</a>
+          <a href="decision-tree.html">Decision Tree</a>
+          <a href="random-forest.html">Random Forest</a>
+          <a aria-current="page" href="catboost.html">CatBoost</a>
+          <a href="xgboost.html">XGBoost</a>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Categorical boosting</p>
+            <h1>CatBoost is gradient boosting built to avoid categorical leakage.</h1>
+            <p>
+              The interview point is not just “it handles categories.” The point is
+              that naive target encoding leaks target information, and CatBoost uses
+              ordered statistics and ordered boosting to reduce that prediction shift.
+            </p>
+          </div>
+          <div class="brief-card">
+            <span>Interview answer</span>
+            <strong>Target stats without peeking.</strong>
+            <p>For a row, categorical encodings are computed from earlier rows in a permutation.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Core mechanics</p>
+          <h2>Why CatBoost exists.</h2>
+          <div class="concept-grid">
+            <article class="concept">
+              <h3>Naive target encoding leaks</h3>
+              <p>If a category value is encoded using the target of the same row, the feature contains direct label information during training.</p>
+            </article>
+            <article class="concept">
+              <h3>Ordered target statistics</h3>
+              <p>CatBoost samples permutations and encodes each row using only previous rows, plus priors for smoothing rare categories.</p>
+            </article>
+            <article class="concept">
+              <h3>Ordered boosting</h3>
+              <p>The model tries to reduce prediction shift: training-time residuals should look closer to what happens at inference.</p>
+            </article>
+            <article class="concept">
+              <h3>Symmetric trees</h3>
+              <p>CatBoost commonly uses oblivious trees where all nodes at the same depth use the same split, improving speed and regularity.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Formulas</p>
+          <h2>Target statistics in one line.</h2>
+          <div class="formula-grid">
+            <article class="formula">
+              <strong>Smoothed category mean</strong>
+              <code>TS = (sum previous y + prior * a) / (count previous + a)</code>
+              <p>The prior prevents rare categories from becoming overconfident.</p>
+            </article>
+            <article class="formula">
+              <strong>No self-target</strong>
+              <code>row i uses rows j where permutation_rank(j) &lt; permutation_rank(i)</code>
+              <p>This is the core leakage-prevention sentence.</p>
+            </article>
+            <article class="formula">
+              <strong>Boosting frame</strong>
+              <code>F_t(x) = F_{t-1}(x) + η f_t(x)</code>
+              <p>CatBoost is still gradient boosting; categorical handling is the differentiator.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Drills</p>
+          <h2>Questions likely in a Yandex-flavored tabular ML interview.</h2>
+          <div class="drill-grid">
+            <article class="drill">
+              <h3>Why is naive target encoding dangerous?</h3>
+              <button class="answer-button" type="button" data-reveal="cat-a1" aria-expanded="false">Reveal answer</button>
+              <div class="answer-box" id="cat-a1">
+                <h4>Answer</h4>
+                <p>The encoded feature can include the current row’s label. Training loss becomes too optimistic, and validation or production performance drops.</p>
+              </div>
+            </article>
+            <article class="drill">
+              <h3>When would you choose CatBoost?</h3>
+              <button class="answer-button" type="button" data-reveal="cat-a2" aria-expanded="false">Reveal answer</button>
+              <div class="answer-box" id="cat-a2">
+                <h4>Answer</h4>
+                <p>For tabular data with important categorical features, especially high-cardinality categories, limited preprocessing time, and leakage-sensitive validation.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Traps</p>
+          <h2>What not to say.</h2>
+          <div class="mistake-grid">
+            <article class="mistake"><strong>“CatBoost just one-hot encodes.”</strong><p>It uses target statistics and categorical combinations; one-hot is only part of the broader handling.</p></article>
+            <article class="mistake"><strong>“Target encoding is always leakage.”</strong><p>It is dangerous when done naively. Ordered or cross-fitted encodings are designed to avoid peeking.</p></article>
+            <article class="mistake"><strong>“CatBoost removes validation needs.”</strong><p>You still need validation matching production, especially for time, user, or group leakage.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Quick quiz</p>
+          <h2>Check the leakage concept.</h2>
+          <div class="quiz-grid">
+            <article class="quiz-card" data-quiz data-correct="Correct: ordered statistics avoid using the row's own target." data-wrong="Not quite. The key is avoiding self-target leakage.">
+              <p>What is the main reason CatBoost uses ordered target statistics?</p>
+              <button type="button" data-answer="false">To make every categorical feature numeric by sorting alphabetically</button>
+              <button type="button" data-answer="true">To avoid using the current row's target in its encoding</button>
+              <button type="button" data-answer="false">To make trees linear</button>
+              <p class="quiz-feedback"></p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="ml-interview.js"></script>
+  </body>
+</html>

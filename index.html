@@ -352,6 +352,45 @@
         opacity: 0.5;
       }
 
+      .interview-mini {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        align-content: center;
+      }
+
+      .interview-mini span {
+        display: grid;
+        place-items: center;
+        min-height: 46px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #eef3ef;
+        color: var(--ink);
+        font-size: 0.8rem;
+        font-weight: 900;
+      }
+
+      .interview-mini span:nth-child(1) {
+        border-color: #9bcac1;
+        background: #d8f0eb;
+      }
+
+      .interview-mini span:nth-child(2) {
+        border-color: #d5a33c;
+        background: #faedc7;
+      }
+
+      .interview-mini span:nth-child(3) {
+        border-color: #aab9e4;
+        background: #e2e9fb;
+      }
+
+      .interview-mini span:nth-child(4) {
+        border-color: #d9a99a;
+        background: #f5ded5;
+      }
+
       .open-label {
         align-self: end;
         display: inline-flex;
@@ -395,13 +434,14 @@
       <p class="eyebrow">Interactive Tutorials</p>
       <h1>Choose a visual math workbench.</h1>
       <p class="lead">
-        Six standalone tutorials are available. The CTC page explains sequence
+        Seven standalone tutorial tracks are available. The CTC page explains sequence
         alignment with forward and backward dynamic programming. The convolution
         hub opens the discrete and continuous convolution workbenches. The
         kernels page shows how image filters detect lines. The neural network
         page shows how weights evolve during toy training runs. The diffusion
         page shows generation as repeated denoising. The transformer page shows
-        how attention moves information between tokens.
+        how attention moves information between tokens. The ML interview track
+        prepares you for tree, forest, CatBoost, and XGBoost questions.
       </p>
 
       <div class="cards" aria-label="Tutorials">
@@ -501,6 +541,21 @@
             <span></span><span></span><span></span><span></span>
           </div>
           <span class="open-label">Open transformer tutorial</span>
+        </a>
+
+        <a class="card" href="ml-interview.html">
+          <div>
+            <p class="eyebrow">Interview prep</p>
+            <h2>ML Trees</h2>
+            <p>
+              Drill decision trees, random forests, XGBoost, and CatBoost with
+              interview answers, traps, formulas, and model comparison prompts.
+            </p>
+          </div>
+          <div class="mini-visual interview-mini" aria-hidden="true">
+            <span>Tree</span><span>Forest</span><span>XGB</span><span>Cat</span>
+          </div>
+          <span class="open-label">Open ML interview track</span>
         </a>
       </div>
     </main>

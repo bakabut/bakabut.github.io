@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Decision Tree Interview Tutorial</title>
+    <link rel="stylesheet" href="ml-interview.css">
+  </head>
+  <body data-page="decision-tree">
+    <header class="topline">
+      <div class="topline-inner">
+        <a class="brand" href="ml-interview.html"><span class="brand-mark">ML</span> Yandex interview track</a>
+        <nav class="top-nav" aria-label="Tutorial pages">
+          <a href="index.html">Home</a>
+          <a href="ml-interview.html">Hub</a>
+          <a aria-current="page" href="decision-tree.html">Tree</a>
+          <a href="random-forest.html">Forest</a>
+          <a href="catboost.html">CatBoost</a>
+          <a href="xgboost.html">XGBoost</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="side-panel">
+        <h2>Tree checklist</h2>
+        <p class="side-note">A good answer explains the greedy split and the overfitting risk.</p>
+        <div class="progress-list">
+          <label><input type="checkbox" data-progress="criteria"> Split criteria</label>
+          <label><input type="checkbox" data-progress="regularization"> Depth and pruning</label>
+          <label><input type="checkbox" data-progress="regression"> Regression trees</label>
+          <label><input type="checkbox" data-progress="traps"> Interview traps</label>
+        </div>
+        <nav class="page-links" aria-label="Track pages">
+          <a href="ml-interview.html">Overview</a>
+          <a aria-current="page" href="decision-tree.html">Decision Tree</a>
+          <a href="random-forest.html">Random Forest</a>
+          <a href="catboost.html">CatBoost</a>
+          <a href="xgboost.html">XGBoost</a>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Base learner</p>
+            <h1>A decision tree is greedy partitioning of feature space.</h1>
+            <p>
+              At every node the tree asks one question, chooses the split that most
+              improves the target purity, and repeats until stopping rules say the
+              leaves are specific enough.
+            </p>
+          </div>
+          <div class="brief-card">
+            <span>Interview answer</span>
+            <strong>Split, stop, average.</strong>
+            <p>Classification leaves vote by class distribution; regression leaves predict the mean target.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Core mechanics</p>
+          <h2>What happens at a node?</h2>
+          <div class="concept-grid">
+            <article class="concept">
+              <h3>Candidate split</h3>
+              <p>For a numerical feature, sort values and test thresholds between adjacent values. For categorical data, test grouped categories or use an encoding strategy.</p>
+            </article>
+            <article class="concept">
+              <h3>Objective</h3>
+              <p>Choose the split that gives the biggest weighted impurity reduction. The choice is local, so the tree is greedy, not globally optimal.</p>
+            </article>
+            <article class="concept">
+              <h3>Leaf prediction</h3>
+              <p>Classification uses class frequencies or the majority class. Regression uses the mean target in the leaf.</p>
+            </article>
+            <article class="concept">
+              <h3>Regularization</h3>
+              <p>Limit max depth, min samples per leaf, min impurity decrease, max leaves, or prune after training.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Formulas</p>
+          <h2>Know these well enough to derive them aloud.</h2>
+          <div class="formula-grid">
+            <article class="formula">
+              <strong>Gini impurity</strong>
+              <code>Gini(S) = 1 - sum_k p_k^2</code>
+              <p>Probability that a random label would be misclassified if sampled from the node distribution.</p>
+            </article>
+            <article class="formula">
+              <strong>Entropy</strong>
+              <code>H(S) = -sum_k p_k log(p_k)</code>
+              <p>Uncertainty in the class distribution. Information gain is parent entropy minus child entropy.</p>
+            </article>
+            <article class="formula">
+              <strong>Regression split</strong>
+              <code>gain = SSE(parent) - SSE(left) - SSE(right)</code>
+              <p>Equivalent to reducing variance inside leaves.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Drills</p>
+          <h2>Questions you should answer in one minute.</h2>
+          <div class="drill-grid">
+            <article class="drill">
+              <h3>Why does a deep tree overfit?</h3>
+              <p>Give the short answer first, then reveal the interview version.</p>
+              <button class="answer-button" type="button" data-reveal="tree-a1" aria-expanded="false">Reveal answer</button>
+              <div class="answer-box" id="tree-a1">
+                <h4>Answer</h4>
+                <p>A deep tree can isolate tiny groups or individual samples, so training impurity keeps falling while the learned boundaries become high-variance and unstable.</p>
+              </div>
+            </article>
+            <article class="drill">
+              <h3>Gini or entropy?</h3>
+              <p>Explain whether the choice usually changes model quality.</p>
+              <button class="answer-button" type="button" data-reveal="tree-a2" aria-expanded="false">Reveal answer</button>
+              <div class="answer-box" id="tree-a2">
+                <h4>Answer</h4>
+                <p>They often choose similar splits. Entropy has information-theoretic meaning; Gini is simpler and slightly cheaper. Regularization usually matters more.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Traps</p>
+          <h2>Common weak answers.</h2>
+          <div class="mistake-grid">
+            <article class="mistake"><strong>“Trees do not need preprocessing.”</strong><p>They are insensitive to monotonic scaling, but categorical encoding, missing values, and leakage still matter.</p></article>
+            <article class="mistake"><strong>“Feature importance is always reliable.”</strong><p>Impurity importance can favor high-cardinality and frequently split features.</p></article>
+            <article class="mistake"><strong>“A tree extrapolates.”</strong><p>A regression tree predicts leaf averages, so outside the observed range it stays piecewise constant.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Quick quiz</p>
+          <h2>Check the decision boundary intuition.</h2>
+          <div class="quiz-grid">
+            <article class="quiz-card" data-quiz data-correct="Correct: single trees create axis-aligned partitions." data-wrong="Not quite. Plain CART-style splits are axis-aligned feature thresholds.">
+              <p>What shape does a standard decision tree build in feature space?</p>
+              <button type="button" data-answer="false">Smooth linear margin</button>
+              <button type="button" data-answer="true">Axis-aligned rectangles</button>
+              <button type="button" data-answer="false">Radial clusters</button>
+              <p class="quiz-feedback"></p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="ml-interview.js"></script>
+  </body>
+</html>

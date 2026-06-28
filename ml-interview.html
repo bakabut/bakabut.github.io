@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yandex ML Interview: Trees and Boosting</title>
+    <link rel="stylesheet" href="ml-interview.css">
+  </head>
+  <body data-page="ml-interview">
+    <header class="topline">
+      <div class="topline-inner">
+        <a class="brand" href="ml-interview.html"><span class="brand-mark">ML</span> Yandex interview track</a>
+        <nav class="top-nav" aria-label="Tutorial pages">
+          <a href="index.html">Home</a>
+          <a aria-current="page" href="ml-interview.html">Hub</a>
+          <a href="decision-tree.html">Tree</a>
+          <a href="random-forest.html">Forest</a>
+          <a href="catboost.html">CatBoost</a>
+          <a href="xgboost.html">XGBoost</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="side-panel">
+        <h2>Prep checklist</h2>
+        <p class="side-note">Track what you can explain without notes.</p>
+        <div class="progress-list">
+          <label><input type="checkbox" data-progress="tree"> Tree split criteria</label>
+          <label><input type="checkbox" data-progress="forest"> Bagging and OOB</label>
+          <label><input type="checkbox" data-progress="catboost"> Ordered target statistics</label>
+          <label><input type="checkbox" data-progress="xgboost"> Boosting objective and gain</label>
+        </div>
+        <nav class="page-links" aria-label="Track pages">
+          <a aria-current="page" href="ml-interview.html">Overview</a>
+          <a href="decision-tree.html">Decision Tree</a>
+          <a href="random-forest.html">Random Forest</a>
+          <a href="catboost.html">CatBoost</a>
+          <a href="xgboost.html">XGBoost</a>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Interview mode</p>
+            <h1>Trees, forests, and boosting without textbook fog.</h1>
+            <p>
+              This track is built for fast ML interview recall: explain the algorithm,
+              name the failure mode, compare alternatives, and answer the trap question
+              before it gets asked.
+            </p>
+          </div>
+          <div class="brief-card">
+            <span>Target</span>
+            <strong>Yandex ML</strong>
+            <p>Four model families, one comparison-first study surface.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Path</p>
+          <h2>Study in dependency order.</h2>
+          <div class="model-grid">
+            <a class="model-row" href="decision-tree.html">
+              <div>
+                <h3>Decision Tree</h3>
+                <p>Base learner, greedy splits, impurity, pruning, and why a single tree overfits.</p>
+              </div>
+              <div class="tag-strip"><span>foundation</span><span>interpretability</span></div>
+            </a>
+            <a class="model-row" href="random-forest.html">
+              <div>
+                <h3>Random Forest</h3>
+                <p>Bagging, feature subsampling, decorrelation, OOB validation, and importance pitfalls.</p>
+              </div>
+              <div class="tag-strip"><span>variance</span><span>ensembles</span></div>
+            </a>
+            <a class="model-row" href="xgboost.html">
+              <div>
+                <h3>XGBoost</h3>
+                <p>Gradient boosting, regularized trees, second-order updates, shrinkage, and split gain.</p>
+              </div>
+              <div class="tag-strip"><span>boosting</span><span>optimization</span></div>
+            </a>
+            <a class="model-row" href="catboost.html">
+              <div>
+                <h3>CatBoost</h3>
+                <p>Ordered boosting, categorical features, target statistic leakage, and symmetric trees.</p>
+              </div>
+              <div class="tag-strip"><span>categoricals</span><span>leakage</span></div>
+            </a>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Model comparison</p>
+          <h2>Know which model you would choose and why.</h2>
+          <div class="comparison-controls" aria-label="Comparison filters">
+            <button class="active" type="button" data-filter="all">All</button>
+            <button type="button" data-filter="categorical">Categorical data</button>
+            <button type="button" data-filter="overfit">Overfitting</button>
+            <button type="button" data-filter="interpretability">Interpretability</button>
+            <button type="button" data-filter="speed">Training speed</button>
+          </div>
+          <div class="comparison-table" data-comparison>
+            <article data-topic="categorical">
+              <strong>Categorical data</strong>
+              <p>Tree: needs encoding.</p>
+              <p>Forest: needs encoding; high-cardinality can mislead importance.</p>
+              <p>XGBoost: strong, but preprocessing matters.</p>
+              <p>CatBoost: usually best default because ordered target statistics are built in.</p>
+            </article>
+            <article data-topic="overfit">
+              <strong>Overfitting</strong>
+              <p>Tree: high risk unless constrained or pruned.</p>
+              <p>Forest: reduces variance through averaging.</p>
+              <p>XGBoost: controls with learning rate, depth, subsampling, regularization.</p>
+              <p>CatBoost: ordered boosting reduces target leakage and prediction shift.</p>
+            </article>
+            <article data-topic="interpretability">
+              <strong>Interpretability</strong>
+              <p>Tree: easiest to explain, if shallow.</p>
+              <p>Forest: harder; use permutation importance or SHAP.</p>
+              <p>XGBoost: strong but needs post-hoc explanation.</p>
+              <p>CatBoost: similar to other boosting ensembles.</p>
+            </article>
+            <article data-topic="speed">
+              <strong>Training speed</strong>
+              <p>Tree: fast and simple.</p>
+              <p>Forest: parallelizable across trees.</p>
+              <p>XGBoost: optimized for large tabular tasks.</p>
+              <p>CatBoost: categorical processing can cost more, but saves preprocessing time.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Interview script</p>
+          <h2>Use this sequence when asked to compare models.</h2>
+          <ol class="interview-script">
+            <li>Start from the data: tabular, categorical, missing values, size, latency, and metric.</li>
+            <li>Name the bias-variance tradeoff: tree overfits, forest averages, boosting reduces bias sequentially.</li>
+            <li>Explain leakage risk for categorical target encodings and why CatBoost handles it carefully.</li>
+            <li>Mention regularization knobs before hyperparameter names become a list.</li>
+            <li>End with validation: time split, group split, OOB, or cross-validation depending on the task.</li>
+          </ol>
+        </section>
+        <p class="footer-note">Progress and reveal state are local to this browser.</p>
+      </div>
+    </main>
+
+    <script src="ml-interview.js"></script>
+  </body>
+</html>

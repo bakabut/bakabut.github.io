@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>XGBoost Interview Tutorial</title>
+    <link rel="stylesheet" href="ml-interview.css">
+  </head>
+  <body data-page="xgboost">
+    <header class="topline">
+      <div class="topline-inner">
+        <a class="brand" href="ml-interview.html"><span class="brand-mark">ML</span> Yandex interview track</a>
+        <nav class="top-nav" aria-label="Tutorial pages">
+          <a href="index.html">Home</a>
+          <a href="ml-interview.html">Hub</a>
+          <a href="decision-tree.html">Tree</a>
+          <a href="random-forest.html">Forest</a>
+          <a href="catboost.html">CatBoost</a>
+          <a aria-current="page" href="xgboost.html">XGBoost</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="side-panel">
+        <h2>XGBoost checklist</h2>
+        <p class="side-note">Be ready to explain gradient boosting as optimization.</p>
+        <div class="progress-list">
+          <label><input type="checkbox" data-progress="boosting"> Sequential boosting</label>
+          <label><input type="checkbox" data-progress="objective"> Objective with regularization</label>
+          <label><input type="checkbox" data-progress="gain"> Split gain</label>
+          <label><input type="checkbox" data-progress="controls"> Overfitting controls</label>
+        </div>
+        <nav class="page-links" aria-label="Track pages">
+          <a href="ml-interview.html">Overview</a>
+          <a href="decision-tree.html">Decision Tree</a>
+          <a href="random-forest.html">Random Forest</a>
+          <a href="catboost.html">CatBoost</a>
+          <a aria-current="page" href="xgboost.html">XGBoost</a>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Gradient boosting</p>
+            <h1>XGBoost adds trees that fix the current model’s mistakes.</h1>
+            <p>
+              The model is an additive ensemble. Each new tree is chosen to reduce
+              the training objective, using gradient and second-order curvature
+              information plus explicit regularization.
+            </p>
+          </div>
+          <div class="brief-card">
+            <span>Interview answer</span>
+            <strong>Optimize loss with trees.</strong>
+            <p>Random forest averages independent trees; XGBoost builds trees sequentially.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Core mechanics</p>
+          <h2>The boosting loop.</h2>
+          <div class="concept-grid">
+            <article class="concept">
+              <h3>Current prediction</h3>
+              <p>Start with a constant prediction, then repeatedly add a tree to improve the objective.</p>
+            </article>
+            <article class="concept">
+              <h3>Gradients</h3>
+              <p>For each row, compute how the loss changes if the prediction changes. This tells the next tree what direction to correct.</p>
+            </article>
+            <article class="concept">
+              <h3>Second order term</h3>
+              <p>XGBoost also uses Hessians, giving a local quadratic approximation to the loss and better leaf weight estimates.</p>
+            </article>
+            <article class="concept">
+              <h3>Regularized tree</h3>
+              <p>The objective penalizes too many leaves and large leaf weights, so a split must earn its complexity.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Formulas</p>
+          <h2>Interview-level math.</h2>
+          <div class="formula-grid">
+            <article class="formula">
+              <strong>Additive model</strong>
+              <code>ŷ_i = sum_t f_t(x_i)</code>
+              <p>Each tree contributes a score; the final prediction is the sum transformed by the task link function.</p>
+            </article>
+            <article class="formula">
+              <strong>Regularized objective</strong>
+              <code>Obj = loss(y, ŷ) + sum_t Ω(f_t)</code>
+              <p>The regularizer penalizes tree complexity and leaf weights.</p>
+            </article>
+            <article class="formula">
+              <strong>Leaf weight intuition</strong>
+              <code>w* = -G / (H + λ)</code>
+              <p>A leaf moves opposite the summed gradient, damped by curvature and L2 regularization.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Drills</p>
+          <h2>Answer these without listing hyperparameters first.</h2>
+          <div class="drill-grid">
+            <article class="drill">
+              <h3>Why does boosting reduce bias?</h3>
+              <button class="answer-button" type="button" data-reveal="xgb-a1" aria-expanded="false">Reveal answer</button>
+              <div class="answer-box" id="xgb-a1">
+                <h4>Answer</h4>
+                <p>Each new tree is trained to improve the remaining errors of the current ensemble, so the model can build a strong predictor from many weak corrections.</p>
+              </div>
+            </article>
+            <article class="drill">
+              <h3>How do you control overfitting?</h3>
+              <button class="answer-button" type="button" data-reveal="xgb-a2" aria-expanded="false">Reveal answer</button>
+              <div class="answer-box" id="xgb-a2">
+                <h4>Answer</h4>
+                <p>Use learning rate, early stopping, max depth, min child weight, row and column subsampling, L1/L2 regularization, and a validation split that matches deployment.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Traps</p>
+          <h2>Common mistakes.</h2>
+          <div class="mistake-grid">
+            <article class="mistake"><strong>“Boosting trains trees independently.”</strong><p>No. Later trees depend on current predictions, so training is sequential.</p></article>
+            <article class="mistake"><strong>“More estimators is always better.”</strong><p>More rounds can overfit unless learning rate, regularization, and early stopping are handled.</p></article>
+            <article class="mistake"><strong>“Residuals only work for MSE.”</strong><p>For general losses, talk about gradients. Squared error residuals are one special case.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="eyebrow">Quick quiz</p>
+          <h2>Check the boosting distinction.</h2>
+          <div class="quiz-grid">
+            <article class="quiz-card" data-quiz data-correct="Correct: later trees depend on the current ensemble." data-wrong="Not quite. XGBoost is sequential additive optimization.">
+              <p>What makes XGBoost different from random forest?</p>
+              <button type="button" data-answer="false">It averages independent deep trees</button>
+              <button type="button" data-answer="true">It adds trees sequentially to optimize loss</button>
+              <button type="button" data-answer="false">It only works for classification</button>
+              <p class="quiz-feedback"></p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="ml-interview.js"></script>
+  </body>
+</html>
